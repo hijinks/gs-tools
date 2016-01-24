@@ -58,13 +58,16 @@ T = cell2table(f_vals,'VariableNames',col_names);
 fan_data = T(find(strcmp(fan,T.Dir_1)), :);
 surfaces = unique(fan_data.Dir_2);
 
+surface_tables = {}
+
 for su=1:length(surfaces)
     surface = surfaces{su};
     surface_data = fan_data(find(strcmp(surface,fan_data.Dir_2)), :);
 
     sites = unique(surface_data.Dir_3);
-
+    
     data_files = {};
+    
     for s=1:length(sites)
         site_data = surface_data(find(strcmp(sites(s),surface_data.Dir_3)), :);
         types = {};
@@ -105,9 +108,8 @@ for su=1:length(surfaces)
 
     wolmans = {};
     meta = {};
-    coords = {};
-
-
+    coords = {};    
+    
     for d=1:length(data_files)
        df = data_files{d};
        if ~isempty(df)
@@ -142,7 +144,10 @@ for su=1:length(surfaces)
     cv_medians = [];
     cv_d84s = [];
     
+    surface_columns = zeros(200,length(data_files));
+    surface_col_names = {}
     for w=1:length(wolmans)
+        surface_columns(3:(length(wolmans{w})+2),w) = wolmans{w};
         stdDev = std(wolmans{w});
         d50 = prctile(wolmans{w},50);
         d84 = prctile(wolmans{w},84);
@@ -153,7 +158,13 @@ for su=1:length(surfaces)
         cmeta = meta{w}
         cmeta.w_id = w;
         metas = [metas,cmeta];
-
+        surf_name = [cmeta.name, '_', cmeta.site];
+        if isvarname(surf_name)
+            surface_col_names{w} = surf_name;
+        else
+            surface_col_names{w} = ['X',surf_name];
+        end
+        
         % Coefficient of variation (using mean)
         cv_mean = stdDev/m;
         cv_norm = (1+(1/(length(wolmans{w}))))*cv_mean;
@@ -178,8 +189,19 @@ for su=1:length(surfaces)
         
         d = sqrt((ix-x1)^2+(iy-y1)^2);
         distances = [distances,d];
+        surface_columns(1,w) = d;
+        if isstrprop(cmeta.cover, 'digit')
+            surface_columns(2,w) = str2num(cmeta.cover);
+        else
+            surface_columns(2,w) = 100;
+        end
     end
-
+    
+    surface_columns(sum(~any(surface_columns,length(data_files)),2)==length(data_files), :) = []    
+    
+    T = array2table(surface_columns, 'VariableNames',surface_col_names);
+    writetable(T,strcat('output/',surface,'_', 'G8.csv'));
+    
     sd.name = surface;
     sd.d84 = d84_dat;
     sd.d50 = d50_dat;
