@@ -5,8 +5,7 @@
 
 addpath('./scripts');
 addpath('./lib');
-% fh = figure('Position',[100 100 1000 500])
-% mh = uimenu(fh,'Label','My menu')
 
-surfaces = fan_data('G10',[36.7765850388, -117.1271739900])
+g10_data = fan_data('G10',[36.7765850388, -117.1271739900], 'coordinates/G10_coords.csv');
+g8_data = fan_data('G8',[36.77300833333333, -117.11081944444445], 'coordinates/G8_coords.csv');
 

@@ -1,8 +1,8 @@
  groups = {}
 
 % Group data by name per site
-for si=1:length(s_data)
-    cs = s_data(si);
+for si=1:length(g10_data)
+    cs = g10_data(si);
     cs = cs{1};
     s_group = cell(1,2)
     for ri=1:length(cs.meta)
@@ -67,7 +67,7 @@ for gg=1:length(groups)
     
     % For each surface
     
-    getDat = s_data{gg};
+    getDat = g10_data{gg};
     
     distances_g = [];
     d84_g = [];
@@ -114,15 +114,15 @@ for gg=1:length(groups)
                         % Group sub data
                         gsd = csg(g)
                         s_weights{f} = str2num(gsd.cover)
-                        l_d84(sfdsfds) = getDat.d84(gsd.id);
-                        l_d50(sfdsfds) = getDat.d50(gsd.id);
-                        l_mean(sfdsfds) = getDat.mean(gsd.id);                   
+                        l_d84(g) = getDat.d84(gsd.id);
+                        l_d50(g) = getDat.d50(gsd.id);
+                        l_mean(g) = getDat.mean(gsd.id);                   
                     end
                     
                     s_d84 = [s_d84, mean(l_d84)]
                     s_d50 = [s_d50, mean(l_d50)]
                     s_mean = [s_mean, mean(l_mean)]
-                    s_distance = getDat.distance(gsd.id)
+                    
                 end
                 
                 d84s_tops = [];
@@ -137,7 +137,7 @@ for gg=1:length(groups)
                 
                 sw = [s_weights{:}]
                 bottom = sum(sw);
-                distances_g = [distances_g, s_distance];
+                distances_g = [distances_g, getDat.distance(gsd.id)];
                 d84_g = [d84_g,(sum(d84s_tops)/bottom)];
                 d50_g = [d50_g,(sum(d50s_tops)/bottom)];
                 mean_g = [mean_g,(sum(means_tops)/bottom)];          
@@ -153,16 +153,20 @@ for gg=1:length(groups)
 end
 
 plotStyle = {'om','ok','og','or','ob'}
+plotStyle3 = {'+m','+k','+g','+r','+b'}
 plotStyle2 = {'-m','-k','-g','-r','-b'}
 surface_names = {'A','B','C','D','E'}
 
 for pppp=1:length(plot_distances)
-    figure;
-    x_data = [1:1:length(plot_d84{pppp})]
+    
+    x_data = [1:1:length(plot_d84{pppp})];
+    x_data = x_data*100;
     y_data = plot_d84{pppp};
     [xsorted, I] = sort(x_data)
     ysorted = y_data(I)
+    figure;
     plot(xsorted, ysorted,plotStyle{pppp}, 'LineWidth', 1);
+    ylim([0,150])
     p = polyfit(xsorted,ysorted,1)
     f = polyval(p,xsorted);
     title(surface_names{pppp});
@@ -171,6 +175,16 @@ for pppp=1:length(plot_distances)
     hold on;
     plot(xsorted,f, plotStyle2{pppp}, 'LineWidth', 1)
     
+    x_data = [1:1:length(plot_d50{pppp})]
+    x_data = x_data*100;
+    y_data = plot_d50{pppp};
+    [xsorted, I] = sort(x_data)
+    ysorted = y_data(I)
+    p = polyfit(xsorted,ysorted,1)
+    f = polyval(p,xsorted);
+    plot(xsorted, ysorted,plotStyle3{pppp}, 'LineWidth', 1);
+    hold on;
+    plot(xsorted,f, plotStyle2{pppp}, 'LineWidth', 1)
 end
 
 % plotStyle = {'xm--','xk--','xg--','xr--','xb--'}
