@@ -1,6 +1,6 @@
 function [s_data] = fan_data(fan, index_point, coord_file)
 
-    s_data = {}
+    s_data = {};
     paths = {};
     filenames = {};
     exts = {};
@@ -51,7 +51,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
     fan_data = T(find(strcmp(fan,T.Dir_1)), :);
     surfaces = unique(fan_data.Dir_2);
 
-    surface_tables = {}
+    surface_tables = {};
 
     for su=1:length(surfaces)
         surface = surfaces{su};
@@ -109,17 +109,17 @@ function [s_data] = fan_data(fan, index_point, coord_file)
                for pp=1:length(df)
                    dat = df{pp};
                    fname = strcat('./raw_data/', dat.wolman);
-                   mname = strcat('./raw_data/', dat.meta)
+                   mname = strcat('./raw_data/', dat.meta);
                    coord_name = strcat(fan,surface,'-',dat.site{1});
                    meta_data = YAML.read(mname{1});
-                   meta_data.c_name = coord_name
-                   meta = [meta, meta_data]
+                   meta_data.c_name = coord_name;
+                   meta = [meta, meta_data];
                    if sum(strcmp(coord_table.Properties.RowNames, coord_name)) > 0
                        coord_row = coord_table({coord_name}, :);
                        coords = [coords,[coord_row.lat, coord_row.lon, 0]];
                    else
-                       location = strsplit(meta_data.location,' ')
-                       coords = [coords,[str2num(char(location(1))), str2num(char(location(2))), 1]]
+                       location = strsplit(meta_data.location,' ');
+                       coords = [coords,[str2num(char(location(1))), str2num(char(location(2))), 1]];
                    end
                    wolmans = [wolmans,csvread(fname{1})];
                 end
@@ -131,14 +131,17 @@ function [s_data] = fan_data(fan, index_point, coord_file)
         distances = [];
         means = [];
         ss_datas = {};
+        stdevs = [];
         metas = {};
         cv_means = [];
         cv_norms = [];
         cv_medians = [];
         cv_d84s = [];
-
+        all_wolmans = {};
+        utm_coords = [];
         surface_columns = zeros(200,length(data_files));
-        surface_col_names = {}
+        surface_col_names = {};
+        
         for w=1:length(wolmans)
             surface_columns(3:(length(wolmans{w})+2),w) = wolmans{w};
             stdDev = std(wolmans{w});
@@ -148,9 +151,11 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             d50_dat = [d50_dat,d50];
             m = mean(wolmans{w});
             means = [means,m];
-            cmeta = meta{w}
+            cmeta = meta{w};
             cmeta.w_id = w;
             metas = [metas,cmeta];
+            all_wolmans = [all_wolmans,wolmans{w}];
+            stdevs = [stdevs,stdDev];
             surf_name = [cmeta.name, '_', cmeta.site];
             if isvarname(surf_name)
                 surface_col_names{w} = surf_name;
@@ -172,14 +177,14 @@ function [s_data] = fan_data(fan, index_point, coord_file)
 
             ss_data = arrayfun(@(x)((x-m)/stdDev),sorted_data);
             ss_datas{w} = ss_data;
-            c1 = coords{w}
+            c1 = coords{w};
             if c1(3)
                x1 = c1(1);
                y1 = c1(2);
             else
                [x1,y1,u1,utm1] = wgs2utm(c1(1),c1(2)); 
             end
-
+            utm_coords = [utm_coords; [x1, y1]];
             d = sqrt((ix-x1)^2+(iy-y1)^2);
             distances = [distances,d];
             surface_columns(1,w) = d;
@@ -190,16 +195,18 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             end
         end
 
-        surface_columns(sum(~any(surface_columns,length(data_files)),2)==length(data_files), :) = []    
+        surface_columns(sum(~any(surface_columns,length(data_files)),2)==length(data_files), :) = [];  
 
         T = array2table(surface_columns, 'VariableNames',surface_col_names);
         writetable(T,strcat('output/',surface,'_', 'G8.csv'));
-
         sd.name = surface;
         sd.d84 = d84_dat;
         sd.d50 = d50_dat;
         sd.mean = means;
+        sd.stdev = stdevs;
         sd.meta = metas;
+        sd.coords = utm_coords;
+        sd.wolmans = all_wolmans;
         sd.cv_mean = cv_means;
         sd.cv_norm = cv_norms;
         sd.cv_median = cv_medians;
