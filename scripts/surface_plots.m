@@ -1,7 +1,8 @@
 function [surface_figures, surface_stats] = surface_plots(fan_name, fan_data)
 %SURFACE_PLOTS Produce figures and statistics for each surface
 %   
-    
+    output_dir = './dump/'
+
     surface_figures = struct();
     surface_stats = struct();
     
@@ -183,20 +184,25 @@ function [surface_figures, surface_stats] = surface_plots(fan_name, fan_data)
         pfig = figure;
 %         set(pfig, 'Visible', 'off')
         d84_plot = plot(xsorted, ysorted,plotStyle{pppp}, 'LineWidth', 1);
-        errorbar(xsorted,ysorted,stdevs);
+%         errorbar(xsorted,ysorted,stdevs);
         ylim([0,150]);
         
         lm = fitlm(xsorted,ysorted,'linear');
+        save('myFile.txt', 'lm', '-ASCII','-append');
         c = lm.Coefficients.Estimate(1);
         mx = lm.Coefficients.Estimate(2);
+        mx2 = 0;
+        c2 = median(ysorted);
         yfit = xsorted*mx+c;
+        yfit2 = xsorted*mx2+c2;
         
         title(surface_names{pppp});
         xlabel('Distance downstream (m)');
         ylabel('Grain size (mm)');
         hold on;
         plot(xsorted,yfit, plotStyle2{pppp}, 'LineWidth', 1)
-        
+        hold on;
+        plot(xsorted,yfit2, 'k--', 'LineWidth', 1)
         
         x_data = plot_distances{pppp}./100;
         x_data = x_data*100;
@@ -205,18 +211,27 @@ function [surface_figures, surface_stats] = surface_plots(fan_name, fan_data)
         ysorted = y_data(I);
         
         lm = fitlm(xsorted,ysorted,'linear')
+        save('myFile.txt', 'lm', '-ASCII','-append');
         c = lm.Coefficients.Estimate(1);
         mx = lm.Coefficients.Estimate(2);
+        mx2 = 0;
+        c2 = median(ysorted);
         yfit = xsorted*mx+c;
+        yfit2 = xsorted*mx2+c2;
         d50_plot = plot(xsorted, ysorted,plotStyle3{pppp}, 'LineWidth', 1);
-        errorbar(xsorted,ysorted,stdevs);
+%         errorbar(xsorted,ysorted,stdevs);
         
         hold on;
         plot(xsorted,yfit,plotStyle2{pppp}, 'LineWidth', 1);
+        
+        hold on;
+        plot(xsorted,yfit2, 'k--', 'LineWidth', 1)
         set(gca,'fontsize', 18);
 %         legend([d50_plot, d84_plot], {'D50', 'D84'});
         surface_figures.(surface_names{pppp}) = pfig;
         surface_stats.(surface_names{pppp}) = struct('lm', lm);
+        plot_name = [output_dir, fan_name, '_', surface_names{pppp}, '.pdf']
+        print(pfig,plot_name,'-dpdf')
     end
 
 end

@@ -11,7 +11,7 @@
 
 % Surface comparisons
 
-fan_name = 'T1';
-fan_data = t1_data;
+fan_name = 'G8';
+fan_data = g8_data;
 
 [s_figs, s_stats] = surface_plots(fan_name, fan_data);
