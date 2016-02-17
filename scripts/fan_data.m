@@ -131,14 +131,17 @@ function [s_data] = fan_data(fan, index_point, coord_file)
         distances = [];
         means = [];
         ss_datas = {};
+        stdevs = [];
         metas = {};
         cv_means = [];
         cv_norms = [];
         cv_medians = [];
         cv_d84s = [];
-
+        all_wolmans = {};
+        utm_coords = [];
         surface_columns = zeros(200,length(data_files));
         surface_col_names = {};
+
         for w=1:length(wolmans)
             surface_columns(3:(length(wolmans{w})+2),w) = wolmans{w};
             stdDev = std(wolmans{w});
@@ -151,6 +154,8 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             cmeta = meta{w};
             cmeta.w_id = w;
             metas = [metas,cmeta];
+            all_wolmans = [all_wolmans,wolmans{w}];
+            stdevs = [stdevs,stdDev];
             surf_name = [cmeta.name, '_', cmeta.site];
             if isvarname(surf_name)
                 surface_col_names{w} = surf_name;
@@ -179,7 +184,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             else
                [x1,y1,u1,utm1] = wgs2utm(c1(1),c1(2)); 
             end
-
+            utm_coords = [utm_coords; [x1, y1]];
             d = sqrt((ix-x1)^2+(iy-y1)^2);
             distances = [distances,d];
             surface_columns(1,w) = d;
@@ -191,16 +196,16 @@ function [s_data] = fan_data(fan, index_point, coord_file)
         end
 
         surface_columns(sum(~any(surface_columns,length(data_files)),2)==length(data_files), :) = [];    
-
         T = array2table(surface_columns, 'VariableNames',surface_col_names);
         writetable(T,strcat('output/',surface,'_', 'G8.csv'));
-
         sd.name = surface;
         sd.d84 = d84_dat;
         sd.d50 = d50_dat;
         sd.mean = means;
+        sd.stdev = stdevs;
         sd.meta = metas;
-        sd.coords = coords;
+        sd.coords = utm_coords;
+        sd.wolmans = all_wolmans;
         sd.cv_mean = cv_means;
         sd.cv_norm = cv_norms;
         sd.cv_median = cv_medians;

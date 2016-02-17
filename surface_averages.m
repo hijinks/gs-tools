@@ -34,7 +34,7 @@ for p=1:length(fans_to_plot)
    ax = gca;
    plot_styles = ['o','x','*']
    for k=1:3
-      plot(x_dat, f(:,k), plot_styles(k), 'MarkerSize', 10);
+      plot(x_dat, f(:,k), plot_styles(k), 'MarkerSize', 10, 'Color', 'k');
       hold on;
    end
    NumTicks = length(sn)+2;
@@ -51,5 +51,5 @@ for p=1:length(fans_to_plot)
    xlabel('Surfaces');
    ylabel('Grain size (mm)');
    legend('Mean','D50', 'D84', 'Location','NorthWest')
-   set(gca,'fontsize', 18);
+   set(gca,'fontsize', 12);
 end

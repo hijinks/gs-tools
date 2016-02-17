@@ -24,14 +24,20 @@ for f=1:length(fans)
         for p=1:length(surface.meta)
            meta = surface.meta{p};
            coords = surface.coords{p};
-           [ix,iy,iu,iutm1] = wgs2utm(coords(1),coords(2));
-           d = surface.distance(p);
-           r = [d, ix, iy];
+           c = surface.name
+           if coords(3)
+            r = [d, coords(1), coords(2)];
+           else
+            [ix,iy,iu,iutm1] = wgs2utm(coords(1),coords(2));
+            d = surface.distance(p);
+            r = [d, ix, iy];            
+           end
            locations = [locations; r];
         end
         distance_sorted = sortrows(locations);
         xy = [distance_sorted(:,2),distance_sorted(:,3)];
-        surface_data.(surface.name) = xy;
+        SW = SWATHobj(dem,xy, 'plot', false);
+        surface_data.(surface.name) = {SW, distance_sorted(1)};
     end
     
     topodata.(fan_name) = surface_data;
@@ -39,17 +45,41 @@ end
 
 fnames = fieldnames(topodata)
 
-for k=1:length(fnames)
-   
-end
+plotStyle = {'m','k','g','r','b'};
+xlimits = {[300 2700],[0 1500]};
+ylimits = {[0 400], [0 350]};
 
-%         for i = 1 : length(SW.xy0)
-%         z_min = nanmin(SW.Z{i},[],1);
-%         z_max = nanmax(SW.Z{i},[],1);
-%         z_mean = nanmean(SW.Z{i},1)';
-%         z_std = nanstd(SW.Z{i},0,1)';
-%         dist = SW.distx{i};
-%     end
-    % [MS] = SWATHobj2mapstruct(SW,'lines');
-% figure, imageschs(dem), hold on
-% mapshow(MS)
+for k=1:length(fnames)
+    figure;
+    surfaces = topodata.(fnames{k});
+    surf_names = fieldnames(surfaces);
+    legend_items = {}
+    for s=1:length(surf_names)
+        surf_name = surf_names{s};
+        if strcmp(surf_name, 'E') < 1
+            if ((strcmp(surf_name, 'D'))+(strcmp(fnames{k}, 'G10'))) < 2
+                surf = surfaces.(surf_name);
+                sw_surface = surf{1};
+                offset = surf{2};
+                for i = 1 : length(sw_surface.xy0)
+                    z_min = nanmin(sw_surface.Z{i},[],1);
+                    z_max = nanmax(sw_surface.Z{i},[],1);
+                    z_mean = nanmean(sw_surface.Z{i},1)';
+                    z_std = nanstd(sw_surface.Z{i},0,1)';
+                    dist = sw_surface.distx{i};
+                end
+                dist = dist+offset;
+                plot(dist,z_mean, plotStyle{s});
+                hold on
+            end
+        end
+        legend_items = [legend_items, surf_name]
+    end
+    title(strcat(fnames{k},' Surface Profiles'));
+    xlim(xlimits{k})
+    ylim(ylimits{k})
+    xlabel('Distance (m)');
+    ylabel('Z');
+    legend(legend_items)
+    set(gca,'fontsize', 12);
+end
