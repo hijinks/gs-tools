@@ -1,21 +1,4 @@
-% Choose fan
-
-% Choose dem
-
-
-% Choose map
-
-
-% Surface plots
-
-
-% Surface comparisons
-
-fan_names = {'G8', 'G10', 'T1'};
-fans = {g8_data, g10_data, t1_data};
-
-% [s_figs, s_stats] = surface_plots(fan_names{2}, fans{2});
-
+function surface_stats(fan_names, fans)
     for j=1:length(fans)
         fan = fans{j};
         fan_surface_names = [];
@@ -180,20 +163,21 @@ fans = {g8_data, g10_data, t1_data};
         for o=1:length(fan_surface_names)
            % Sort by distance
            sw_n = sw_fn(o);
-           f1 = figure;
+           figure;
            sw = site_wolmans.(sw_n{1})
            d_sorted = sortrows(sw,1);
            r = d_sorted(:,2);
            wm = cell2mat(r');
-           
+           %boxplot(wm);
            ss = size(wm);
-           for y=1:ss(2)
+           for y=1:length(ss(2))
                 hold on;
                 cdfplot(wm(:,y));
            end
-           f2 = figure;
-           boxplot(wm);
            
            title(strcat(fan_name, ' ', sw_n, ' Sites'));
         end
     end
+end
+
+

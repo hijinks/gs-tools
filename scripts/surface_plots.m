@@ -166,10 +166,10 @@ function [surface_figures, surface_stats] = surface_plots(fan_name, fan_data)
         plot_std{gg} = std_g;
     end
 
-    plotStyle = {'om','ok','og','or','ob'};
-    plotStyle3 = {'+m','+k','+g','+r','+b'};
-    plotStyle2 = {'-m','-k','-g','-r','-b'};
-    surface_names = {'A','B','C','D','E'};
+    plotStyle = {'om','ok','og','or','ob','oc'};
+    plotStyle3 = {'+m','+k','+g','+r','+b','+c'};
+    plotStyle2 = {'-m','-k','-g','-r','-b','-c'};
+    surface_names = {'A','B','C','D','E', 'F'};
     
     for pppp=1:length(plot_distances)
 
