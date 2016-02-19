@@ -1,4 +1,7 @@
-function surface_stats(fan_names, fans)
+function [distance_sorted] = surface_stats(fan_names, fans)
+
+    distance_sorted = struct();
+    
     for j=1:length(fans)
         fan = fans{j};
         fan_surface_names = [];
@@ -25,6 +28,7 @@ function surface_stats(fan_names, fans)
             c_name = cs_meta.c_name;
             cda.name = cs_meta.name;
             cda.cover = cover;
+            cda.coords = cs.coords(ri,:);
             cda.id = cs_meta.w_id;
             cda.distance = cs.distance(cda.id);
             cda.wolman = cs.wolmans{cda.id};
@@ -103,7 +107,7 @@ function surface_stats(fan_names, fans)
 
                         s_weights = {};
                         s_wolmans = {};
-
+                        
                         % For each site group
                         for f=1:length(fnames)
                             % Current site group
@@ -132,6 +136,8 @@ function surface_stats(fan_names, fans)
                             s_wolmans{f} = sg_wolmans;
                             s_distances{f} = mean(sg_distances);
                         end
+                        
+                        s_coords = gsd.coords;
 
                         wolman_matrix = []
                         for www=1:length(s_weights)
@@ -142,17 +148,13 @@ function surface_stats(fan_names, fans)
 
                         wolman_column = reshape(wolman_matrix,numel(wolman_matrix),1);
                         
-                        if max(wolman_column) > 500
-                            
-                        end
-                        
                         if length(wolman_column) < 30000
                             dif = 30000 - length(wolman_column);
                             pad = nan(dif,1);
                             wolman_column = [wolman_column;pad];
                         end
 
-                        slist = [slist; {s_distances{1},wolman_column}];
+                        slist = [slist; {s_distances{1},wolman_column, s_coords}];
                     end
                 end
                 site_wolmans.(fan_surface_names(gg)) = slist;
@@ -160,23 +162,35 @@ function surface_stats(fan_names, fans)
         end
 
         sw_fn = fieldnames(site_wolmans);
+        
+        surface_sorted = struct();
+        
         for o=1:length(fan_surface_names)
            % Sort by distance
            sw_n = sw_fn(o);
-           figure;
+           f1 = figure;
+           set(f1, 'visible', 'off')
            sw = site_wolmans.(sw_n{1})
            d_sorted = sortrows(sw,1);
            r = d_sorted(:,2);
            wm = cell2mat(r');
-           %boxplot(wm);
+           
            ss = size(wm);
-           for y=1:length(ss(2))
+           for y=1:ss(2)
                 hold on;
                 cdfplot(wm(:,y));
            end
+           f2 = figure;
+           set(f2, 'visible', 'off');
+           boxplot(wm);
            
-           title(strcat(fan_name, ' ', sw_n, ' Sites'));
+           % Save distance sorted to master struct
+           surface_sorted.(sw_n{1}) = d_sorted;
+           
+           title(strcat(fan_name, ' ', sw_n{1}, ' Sites'));
         end
+        
+        distance_sorted.(fan_name) = surface_sorted;
     end
 end
 

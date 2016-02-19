@@ -4,14 +4,14 @@ addpath('./scripts');
 addpath('./topotoolbox');
 addpath('./topotoolbox/tools_and_more');
 
-dem = GRIDobj('dems/grapevine_dem3.tif');
+dem = GRIDobj('dems/grotto_dem7.tif');
 dem = inpaintnans(dem);
 
 
 
 topodata = struct();
-fan_names = {'G8', 'G10'};
-fans = {g8_data, g10_data};
+fan_names = {'T1'};
+fans = {t1_data};
 
 for f=1:length(fans)
     fan_name = fan_names{f};
@@ -23,15 +23,8 @@ for f=1:length(fans)
         locations = [];
         for p=1:length(surface.meta)
            meta = surface.meta{p};
-           coords = surface.coords{p};
+           coords = surface.coords(p,:);
            c = surface.name
-           if coords(3)
-            r = [d, coords(1), coords(2)];
-           else
-            [ix,iy,iu,iutm1] = wgs2utm(coords(1),coords(2));
-            d = surface.distance(p);
-            r = [d, ix, iy];            
-           end
            locations = [locations; r];
         end
         distance_sorted = sortrows(locations);
