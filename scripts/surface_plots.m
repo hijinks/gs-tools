@@ -1,11 +1,11 @@
-function [surface_figures, surface_stats] = surface_plots(fan_name, fan_data)
+function [surface_figures, surface_stats] = surface_plots(fan_name, fan_data, dump)
 %SURFACE_PLOTS Produce figures and statistics for each surface
 %   
     output_dir = './dump/'
 
     surface_figures = struct();
     surface_stats = struct();
-    
+
     for si=1:length(fan_data)
         
         cs = fan_data(si);

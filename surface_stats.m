@@ -1,6 +1,7 @@
 function [distance_sorted] = surface_stats(fan_names, fans)
 
     distance_sorted = struct();
+    figures = struct();
     
     for j=1:length(fans)
         fan = fans{j};
@@ -75,6 +76,7 @@ function [distance_sorted] = surface_stats(fan_names, fans)
                 s_group = [s_group;{c_name, struct(gname, cda)}];
             end
         end
+        
         s_group(1,:) = [];
         groups{si} = s_group;
 
@@ -188,6 +190,7 @@ function [distance_sorted] = surface_stats(fan_names, fans)
            surface_sorted.(sw_n{1}) = d_sorted;
            
            title(strcat(fan_name, ' ', sw_n{1}, ' Sites'));
+           
         end
         
         distance_sorted.(fan_name) = surface_sorted;
