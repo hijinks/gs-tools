@@ -13,6 +13,7 @@ ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
     
 for fn=1:length(fannames)
     cf = distance_sorted.(fannames{fn});
+    fan_data = fans{fn};
     s_names = fieldnames(cf);
     
     for sn=1:length(s_names)
@@ -28,9 +29,10 @@ for fn=1:length(fannames)
         set(h,'visible','on')
         pos=get(h,'Position')
         pos(2) = 1.05
-        set(h,'Position',pos) 
+        set(h,'Position',pos)
+        surface_data = fan_data{sn}
         dat = cf.(s_names{sn});
-       
+               
        r = dat(:,2);
        wm = cell2mat(r');
            
@@ -58,20 +60,22 @@ for fn=1:length(fannames)
        plot_surface(dat);
        
        axes(tbs(4));
-       if strcmp(fannames{fn}, 'T1') > 0
-          dem = grotto_dem; 
-       else
-          dem = grape_dem;
-       end
-
-       coords = cell2mat(dat(:,3));
-
-       [dn,z] = demprofile(dem, 500, coords(:,1), coords(:,2));
-
-       plot(dn,z)
-       xlabel('Distance downstream (m)');
-       ylabel('Elevation (m)');
-       ylim([0,500])
+       
+       ss_fit(surface_data)
+%        if strcmp(fannames{fn}, 'T1') > 0
+%           dem = grotto_dem; 
+%        else
+%           dem = grape_dem;
+%        end
+% 
+%        coords = cell2mat(dat(:,3));
+% 
+%        [dn,z] = demprofile(dem, 500, coords(:,1), coords(:,2));
+% 
+%        plot(dn,z)
+%        xlabel('Distance downstream (m)');
+%        ylabel('Elevation (m)');
+%        ylim([0,500])
        print(f, '-dpdf', ['dump/new/' fannames{fn} '_' s_names{sn} '.pdf'])
     end
     
