@@ -5,7 +5,7 @@ surfaces = []
 
 sf_fans = fieldnames(distance_sorted);
 
-mode = 0
+mode = 1
 
 fig = figure;
 for p=1:length(sf_fans);
@@ -83,5 +83,5 @@ if mode
     xlabel('Long axis grain size (mm)')
     legend([last_pink, last_black], {'Holocene & older', 'Modern'}, 'Location', 'SE')
     set(fig,'XScale','log');
-
+    
 end
