@@ -1,6 +1,6 @@
 
-fan_names = {'G10', 'G8'};
-fans = {g10_data,g8_data}
+fan_names = {'G8', 'G10', 'SR1', 'T1'};
+fans = {g8_data, g10_data, sr1_data, t1_data}
 surface_names = struct()
 surface_data = struct()
 
@@ -30,7 +30,7 @@ for p=1:length(fans_to_plot)
    sn = surface_names.(fan_name{1});
    f = surface_data.(fan_name{1});
    x_dat = [1:length(sn)];
-   figure
+   figure;
    ax = gca;
    plot_styles = ['o','x','*']
    for k=1:3
@@ -39,7 +39,7 @@ for p=1:length(fans_to_plot)
    end
    NumTicks = length(sn)+2;
    xlim([-1 length(sn)]+1);
-   ylim([20 120])
+   ylim([20 150])
    L = get(gca,'XLim');
    set(ax,'XTick',linspace(L(1),L(2),NumTicks))
    labels = {[]}
@@ -52,4 +52,6 @@ for p=1:length(fans_to_plot)
    ylabel('Grain size (mm)');
    legend('Mean','D50', 'D84', 'Location','NorthWest')
    set(gca,'fontsize', 12);
+%    print('-dpdf', ['dump/comparisons/' fan_name '.eps'])
+
 end
