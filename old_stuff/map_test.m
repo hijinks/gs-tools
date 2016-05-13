@@ -7,8 +7,26 @@ G = grapevine(:,:,2);
 B = grapevine(:,:,3);
 
 mapshow(cat(3,R,G,B), D)
-coord_table = get_coords('G8_coords.csv',2, 63);
-coord_table2 = get_coords('G10_coords.csv',2, 63);
+
+figure
+[grapevine, D] = geotiffread('maps/anza-borrego/santa_rosa_fan.tif');
+R = grapevine(:,:,1);
+G = grapevine(:,:,2);
+B = grapevine(:,:,3);
+
+mapshow(cat(3,R,G,B), D)
+
+
+figure
+[grapevine, D] = geotiffread('maps/grotto/grott.tif');
+R = grapevine(:,:,1);
+G = grapevine(:,:,2);
+B = grapevine(:,:,3);
+
+mapshow(cat(3,R,G,B), D)
+
+coord_table = get_coords('coordinates/G8_coords.csv',2, 63);
+coord_table2 = get_coords('coordinates/G10_coords.csv',2, 63);
 lat_utm = []
 lon_utm = []
 lat_utm2 = []

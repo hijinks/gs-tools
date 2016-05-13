@@ -5,7 +5,7 @@ surfaces = []
 
 sf_fans = fieldnames(distance_sorted);
 
-mode = 1
+mode = 0
 
 fig = figure;
 for p=1:length(sf_fans);

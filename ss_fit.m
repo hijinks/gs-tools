@@ -17,24 +17,25 @@ function ss_fit(surface)
     end
 
     plot(all_x,all_y, 'x');
+    set(gca, 'FontSize',14);
     hold on;
-    [XOut,YOut] = consolidator(all_x,all_y, 'median');
-
-    cubic_fit = fit(XOut',YOut','cubicinterp')
-    h = plot(cubic_fit);
-    set(h, 'LineWidth',1.5, 'Color', 'k')
-
-    xsmall = [-4:.1:8];
-    yFitted = feval(cubic_fit,xsmall);
-
-    [ypk,idx] = findpeaks(yFitted);
-    xpk = xsmall(idx);
-    [M,I] = max(ypk);
-    cmid = xpk(I)
-
-    plot([cmid cmid], [-10,60], '-r')
-    text(cmid+.1, 10, ['\leftarrow' num2str(cmid)], 'Color', 'red')
-    xlabel('Similarity Variable');
+%     [XOut,YOut] = consolidator(all_x,all_y, 'median');
+% 
+%     cubic_fit = fit(XOut',YOut','cubicinterp')
+%     h = plot(cubic_fit);
+%     set(h, 'LineWidth',1.5, 'Color', 'k')
+% 
+%     xsmall = [-4:.1:8];
+%     yFitted = feval(cubic_fit,xsmall);
+% 
+%     [ypk,idx] = findpeaks(yFitted);
+%     xpk = xsmall(idx);
+%     [M,I] = max(ypk);
+%     cmid = xpk(I)
+% 
+%     plot([cmid cmid], [-10,60], '-r')
+%     text(cmid+.1, 10, ['\leftarrow' num2str(cmid)], 'Color', 'red')
+%     xlabel('Similarity Variable');
     ylabel('Frequency');
 end
 
