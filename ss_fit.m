@@ -7,6 +7,7 @@ function ss_fit(surface)
     xp = [-4:1:8];
     all_x = [];
     all_y = [];
+    
     for k=1:length(ss)
        [N,edges] = histcounts(ss{k}, ed);
        plot(xp,N, 'Color' , [.7 .7 .7]);

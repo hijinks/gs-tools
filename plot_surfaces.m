@@ -8,8 +8,6 @@ xMargin = 0;               %# left/right margins from page borders
 yMargin = 2;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
 ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
-
-
     
 for fn=1:length(fannames)
     cf = distance_sorted.(fannames{fn});

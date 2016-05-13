@@ -24,7 +24,7 @@ function [distance_sorted] = surface_stats(fan_names, fans)
         % Loop over sites
         for ri=1:length(cs.meta)
 
-            cs_meta = cs.meta{ri}
+            cs_meta = cs.meta{ri};
             cover = cs_meta.cover;
             c_name = cs_meta.c_name;
             cda.name = cs_meta.name;
@@ -75,11 +75,14 @@ function [distance_sorted] = surface_stats(fan_names, fans)
                 strcat(gname, c_name);
                 s_group = [s_group;{c_name, struct(gname, cda)}];
             end
+            
+            if max(cda.wolman) > 600
+               disp([cs.name ' '  c_name])
+            end
         end
         
         s_group(1,:) = [];
         groups{si} = s_group;
-
 
        end
 
@@ -141,17 +144,17 @@ function [distance_sorted] = surface_stats(fan_names, fans)
                         
                         s_coords = gsd.coords;
 
-                        wolman_matrix = []
+                        wolman_matrix = [];
                         for www=1:length(s_weights)
-                            wolman_m = nan(300,s_weights{www});
+                            wolman_m = nan(500,s_weights{www});
                             wolman_m(1:length(s_wolmans{www}),1:s_weights{www}) = repmat(s_wolmans{www}, 1, s_weights{www});
                             wolman_matrix = [wolman_matrix, wolman_m];
                         end
 
                         wolman_column = reshape(wolman_matrix,numel(wolman_matrix),1);
                         
-                        if length(wolman_column) < 30000
-                            dif = 30000 - length(wolman_column);
+                        if length(wolman_column) < 55000
+                            dif = 55000 - length(wolman_column);
                             pad = nan(dif,1);
                             wolman_column = [wolman_column;pad];
                         end
@@ -172,7 +175,7 @@ function [distance_sorted] = surface_stats(fan_names, fans)
            sw_n = sw_fn(o);
            f1 = figure;
            set(f1, 'visible', 'off')
-           sw = site_wolmans.(sw_n{1})
+           sw = site_wolmans.(sw_n{1});
            d_sorted = sortrows(sw,1);
            r = d_sorted(:,2);
            wm = cell2mat(r');
