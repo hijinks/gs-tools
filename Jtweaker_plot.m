@@ -1,3 +1,10 @@
+Y = 42.0;                  %# A3 paper size
+X = 29.7;                  %# A3 paper size
+xMargin = 0;               %# left/right margins from page borders
+yMargin = 4;               %# bottom/top margins from page borders
+xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
+ySize = Y - 2*yMargin;     %# figure size on paper (widht c& hieght)
+
 csv_dir = ['.' filesep 'jfits'];
 
 dir_search = subdir(csv_dir);
@@ -71,7 +78,8 @@ a_f = 0.8;
 b_f = 0.2;
 c_f = 0.15;
 
-figure
+h = figure;
+set(h, 'Visible', 'off');
 subplot(3,2,1);
 plot(ag, 'x');
 hold on;
@@ -104,15 +112,25 @@ xlim([1,length(cg)]);
 title('cg');
 
 subplot(3,2,4);
+plot(C1, 'x');
+hold on;
+C1_m = mean(C1);
+plot(1:1:length(C1), ones(1,17).*C1_m, '--b');
+title('C1');
+
+subplot(3,2,5);
 plot(C2, 'x');
 hold on;
 C2_m = mean(C2);
 plot(1:1:length(C2), ones(1,17).*C2_m, '--b');
 title('C2');
 
-subplot(3,2,5);
+subplot(3,2,6);
 plot(CV, 'x');
 hold on;
 CV_m = mean(CV);
 plot(1:1:length(CV), ones(1,17).*CV_m, '--b');
 title('CV');
+
+supertitle('Analytical fits')
+print(h, '-dpdf', ['dump/jfits.pdf'])

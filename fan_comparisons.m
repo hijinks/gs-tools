@@ -14,7 +14,7 @@ for p=1:length(sf_fans);
     
     last_black = 0;
     last_pink = 0;
-        
+    
     for s=1:length(current_fan_surfaces)
         
         current_surface = current_fan.(current_fan_surfaces{s});

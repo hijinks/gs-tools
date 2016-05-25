@@ -286,6 +286,13 @@ ag = .9;
 bg = .2;
 cg = .15;
 
+if length(varargin) == 4
+    previous_params = varargin{4};
+    ag = previous_params.ag;
+    bg = previous_params.ag;
+    cg = previous_params.cg; 
+end
+
 [ss, fraction, field_x, field_y, fit_x, fit_y] = Jtweaker_Process(handles, varargin{1},  varargin{2}, ag, bg, cg);
 handles.ds_surface = varargin{1};
 handles.surface_data = varargin{2};

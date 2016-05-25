@@ -110,5 +110,9 @@ str = get(handles.fan_surface_chooser, 'String');
 val = get(handles.fan_surface_chooser,'Value');
 if strcmp(str{val}, 'Choose surface') < 1
     surface = handles.fan_surfaces.(str{val});
-    Jtweaker(surface{1}, surface{2}, str{val})
+    if length(surface) == 3
+        Jtweaker(surface{1}, surface{2}, str{val}, surface{3})
+    else
+        Jtweaker(surface{1}, surface{2}, str{val})
+    end
 end
