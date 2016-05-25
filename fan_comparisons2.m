@@ -5,16 +5,12 @@ surfaces = []
 
 sf_fans = fieldnames(distance_sorted);
 
-mode = 0
-
 fig = figure;
-for p=1:length(sf_fans);
+
+for p=1:length(sf_fans)
     current_fan = distance_sorted.(sf_fans{p});
     current_fan_surfaces = fieldnames(current_fan);
-    
-    last_black = 0;
-    last_pink = 0;
-    
+        
     for s=1:length(current_fan_surfaces)
         
         current_surface = current_fan.(current_fan_surfaces{s});
@@ -23,6 +19,8 @@ for p=1:length(sf_fans);
         
         colours = {'kx', 'b*', 'mo', 'rx'};
         colour_c = {'k', 'b', 'm', 'r'}
+        
+        
         if strcmp(current_fan_surfaces{s}, 'A') > 0
             line_colour = colours{3};
             ccc = colour_c{3};
@@ -45,21 +43,6 @@ for p=1:length(sf_fans);
             end
         end
         
- 
-        if mode
-            for j=1:length(wolmans)
-                h = cdfplot(wolmans{j});    
-                set(h,'Color',ccc)
-                hold on;
-            end
-            set(h.Parent, 'xlim', [0 250])
-            
-            if t
-               last_pink = h;
-            else
-               last_black = h; 
-            end
-        else
             
             norm_dist = cell2mat(current_surface(:,1))./max_dist;
             d84_list = [];
@@ -78,10 +61,4 @@ for p=1:length(sf_fans);
         end
     end
 end
-if mode
-    title('Grain size distribtions for fan surfaces in Death Valley')
-    xlabel('Long axis grain size (mm)')
-    legend([last_pink, last_black], {'Holocene & older', 'Modern'}, 'Location', 'SE')
-    set(fig,'XScale','log');
-    
-end
+

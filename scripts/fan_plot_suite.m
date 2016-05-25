@@ -8,7 +8,7 @@ color_map = [[0 0.4980 0]; [0.8706 0.4902 0]; [0.8 0 0]; [0.2039 0.3020 0.4941];
 line_styles = {'-','-k','-g','-r','-b','-c'};
 point_styles = {'xm','xk','xg','xr','xb','xc'};
 line_point_styles = {'x-','xk-','xg-','xr-','xb-','xc-'};
-fans = {g8_data, g10_data, t1_data, 'sr1_data'};
+fans = {g8_data, g10_data, t1_data, sr1_data};
 
 % Normalised downstream fining for each surface
 

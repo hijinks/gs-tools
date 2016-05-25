@@ -29,7 +29,7 @@ for fn=1:length(fannames)
     surface_figure = figure()
     
     for sn=1:length(s_names)
-        surface_data = fan_data{sn}
+        surface_data = fan_data{sn};
         surface = cf.(s_names{sn});
         ss = surface_data.ss;
         ed = -4.5:1:8.5;
@@ -40,14 +40,20 @@ for fn=1:length(fannames)
         for k=1:length(ss)
            [N,edges] = histcounts(ss{k}, ed);
            plot(xp,N, 'Color' , [.7 .7 .7]);
+           meta = surface_data.meta{k};
            hold on;
+           if max(N) > 70
+               disp([s_names{sn} meta.name meta.site]);
+           end
            all_x = [all_x; xp];
            all_y = [all_y; N];
+           
         end
 
         plot(all_x,all_y, 'x');
         set(gca, 'FontSize',14);
-        hold on;                
+        hold on;
+        
     end
     title(['Self Similiarity Curves ' fannames{fn}]);
     set(gca, 'FontSize', 14)

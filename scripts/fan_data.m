@@ -48,14 +48,14 @@ function [s_data] = fan_data(fan, index_point, coord_file)
     col_names{col_l} = 'Extension';
     T = cell2table(f_vals,'VariableNames',col_names);
 
-    fan_data = T(find(strcmp(fan,T.Dir_1)), :);
-    surfaces = unique(fan_data.Dir_2);
+    f_data = T(find(strcmp(fan,T.Dir_1)), :);
+    surfaces = unique(f_data.Dir_2);
 
     surface_tables = {};
 
     for su=1:length(surfaces)
         surface = surfaces{su};
-        surface_data = fan_data(find(strcmp(surface,fan_data.Dir_2)), :);
+        surface_data = f_data(find(strcmp(surface,f_data.Dir_2)), :);
 
         sites = unique(surface_data.Dir_3);
 

@@ -33,7 +33,7 @@ for fn=1:length(fannames)
                
        r = dat(:,2);
        wm = cell2mat(r');
-           
+       
        tbs = tight_subplot(2,2,[.07 .07],[.07 .07],[.05 .05]);
        axes(tbs(1));
        cx = tbs(1);
