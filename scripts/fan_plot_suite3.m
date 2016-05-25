@@ -52,7 +52,7 @@ for fn=1:length(fannames)
     title(['Self Similiarity Curves ' fannames{fn}]);
     set(gca, 'FontSize', 14)
     ylim([0,70])
-    print(surface_figure, '-dpdf', [output_path fannames{fn} '_self_similarity' '.pdf'])
+%     print(surface_figure, '-dpdf', [output_path fannames{fn} '_self_similarity' '.pdf'])
     
 %     surface_averages_figure = figure;
 %     
