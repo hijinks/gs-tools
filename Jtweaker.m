@@ -289,7 +289,7 @@ cg = .15;
 if length(varargin) == 4
     previous_params = varargin{4};
     ag = previous_params.ag;
-    bg = previous_params.ag;
+    bg = previous_params.bg;
     cg = previous_params.cg; 
 end
 
@@ -551,6 +551,7 @@ function save_data_btn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [file,path]  = uiputfile('*.csv', 'Save Data', handles.surface_name);
 saveData = handles.saveData;
+disp(handles)
 a = get(handles.ag_output,'String');
 b = get(handles.bg_output,'String');
 c = get(handles.cg_output,'String');

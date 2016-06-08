@@ -1,37 +1,36 @@
 addpath('./scripts');
 addpath('./lib');
 
-fannames = fieldnames(distance_sorted);
-
 X = 42.0;                  %# A3 paper size
 Y = 29.7;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
 yMargin = 4;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
 ySize = Y - 2*yMargin;     %# figure size on paper (widht c& hieght)
-    
-for fn=1:length(fannames)
-    cf = distance_sorted.(fannames{fn});
-    fan_data = fans{fn};
-    s_names = fieldnames(cf);
-    
-    fig = figure;
 
-%     set(fig,'Visible','off');
-    set(fig, 'PaperSize',[X Y]);
-    set(fig, 'PaperPosition',[0 yMargin xSize ySize])
-    set(fig, 'PaperUnits','centimeters');
+fan_width_data;
+
+fan_names = fieldnames(fan_lobes);
+
+for f=1:length(fan_names)
+   	fan_ds = distance_sorted.(fan_names{f});
+    fan_ls = fan_lobes.(fan_names{f});
+    fan_ls_s = fieldnames(fan_ls);
+    origins = fan_origins.(fan_names{f});
+    cf = distance_sorted.(fan_names{f});
+    fan_data = fans{f};
 
     rows = 2;
-    cols = ceil(length(s_names)/rows);
-
-    for sn=1:length(s_names)
-        
-        sb = subplot(rows,cols, sn);
+    cols = ceil(length(fan_ls_s)/rows);
+    figure
+    
+    for s=1:length(fan_ls_s)
+   
+        sb = subplot(rows,cols, s);
  
-        surface = fan_data{sn};
-        surface_ds = cf.(s_names{sn});
-        
+        surface = fan_data{s};
+        surface_ds = cf.(fan_ls_s{s});
+
         d84s = zeros(length(surface_ds(:,1)), 1);
         d50s = zeros(length(surface_ds(:,1)), 1);
         d70s = zeros(length(surface_ds(:,1)), 1);
@@ -58,20 +57,24 @@ for fn=1:length(fannames)
 
         C1 = .7;
         CV = mean(surface.cv_norm);
-        C2 = C1/CV;
+        C2 = C1/CV;        
+        
+        params = struct();
+        params.uplift = 1e-4; %m/yr
+        params.qs = 10000; %m^3/yr
+        params.yrs = 1;
+        params.grainpdf =  log10(d50s(1));
+        params.phi = log10(d84s(1)/d50s(1));
+        params.C1 = C1;
+        params.Cv = CV;
+        params.C2 = C2;
+        params.origin_x = origins(1);
+        params.origin_y = origins(2);
 
-        grainpdf0 = log10(d50s(1)) ; % initial grain size pdf log(D50)
-        phi0 = log10(d84s(1)/d50s(1)); % standard deviation of the sediment supply log(D84/D50)
-
-        nx = 50;
-        x = linspace(distance(1), distance(end), nx);
-        y_star = linspace(0, 1, nx);
-        mean_gs_predict = zeros(nx, 1);
-
-        for k=1:length(x)
-            pr = grainpdf0+phi0*(C2/C1)*(exp(-C1*y_star(k)-1));
-            mean_gs_predict(k) = 10.^pr;
-        end
+        shp = fan_ls.(fan_ls_s{s});
+        ds = fan_ds.(fan_ls_s{s});
+        [dist, width] = lobe_width(shp, ds, [origins(1),origins(2)]);
+        [downstream_m,grain_ds] = ds_predict(shp, ds, dist, width, params);
 
         xlabel('Distance (m)');
         ylabel('Grain size(mm)');
@@ -85,19 +88,11 @@ for fn=1:length(fannames)
 
         textbp(run_params,'EdgeColor', 'black', 'FontSize', 8, 'Parent', sb);
 
-        predicted_ds = plot(x, mean_gs_predict, 'k-');
+        predicted_ds = plot(downstream_m, grain_ds, 'k-');
         legend([field_ds, predicted_ds], {'Field Mean', 'Predicted Mean'}, 'Location', 'SE')
 
         v = axis;
-        title(s_names{sn});
+        title(fan_ls_s{s});
         ylim([0 100]);
     end
-    
-    stitle = supertitle(fannames{fn});
-    pos = get(stitle, 'position');
-    set(stitle,'position',[0.4 1.0090 0.4]);
-    set(gca, 'FontSize', 14);
-    
-%     print(fig, '-dpdf', ['dump/ds_predictions/' fannames{fn} '_predictions' '.pdf'])
-
 end

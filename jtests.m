@@ -18,23 +18,26 @@ if exist(csv_dir, 'dir')
    previous_params = struct();
    for l=1:length(dir_search)
         [pathstr,fname,ext] = fileparts(dir_search(l).name);
-        fpath = dir_search(l).name;
-        delimiter = ',';
-        formatSpec = '%*q%*q%*q%*q%*q%*q%*q%*q%*q%*q%q%q%q%*s%*s%*s%[^\n\r]';
-        fileID = fopen(fpath,'r');
-        dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter,  'ReturnOnError', false);
+        if strcmp('.csv', ext) > 0
+            fpath = dir_search(l).name;
+            delimiter = ',';
+            formatSpec = '%*q%*q%*q%*q%*q%*q%*q%*q%*q%*q%q%q%q%*s%*s%*s%[^\n\r]';
+            fileID = fopen(fpath,'r');
+            dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter,  'ReturnOnError', false);
 
-        fclose(fileID);
-        
-        ag = dataArray{:, 1};
-        bg = dataArray{:, 2};
-        cg = dataArray{:, 3};
-        
-        previous_params.(fname) = struct('ag',str2num(ag{2}),...
-            'bg',str2num(bg{2}),'cg',str2num(cg{2}));
+            fclose(fileID);
 
-        %% Clear temporary variables
-        clearvars filename delimiter formatSpec fileID dataArray ans;
+            ag = dataArray{:, 1};
+            bg = dataArray{:, 2};
+            cg = dataArray{:, 3};
+
+            previous_params.(fname) = struct('ag',str2num(ag{2}),...
+                'bg',str2num(bg{2}),'cg',str2num(cg{2}));
+
+            %% Clear temporary variables
+            clearvars filename delimiter formatSpec fileID dataArray ans;
+   
+        end
    end
 end
 
