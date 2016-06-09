@@ -17,6 +17,7 @@ function ss_fit(surface)
     end
 
     plot(all_x,all_y, 'x');
+    set(gca, 'FontSize',14);
     hold on;
     [XOut,YOut] = consolidator(all_x,all_y, 'median');
 

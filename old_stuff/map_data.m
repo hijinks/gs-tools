@@ -65,8 +65,10 @@ for si=1:length(g10_data)
        
     end
     s_info = [s_group,s_distances,s_sites];
-    s_info = sortrows(s_info,3)
-    g10_surface_sites.(cs.name) = s_info;
+    if isempty(s_info) < 1
+        s_info = sortrows(s_info,3)
+        g10_surface_sites.(cs.name) = s_info;
+    end
 end
 
 cs = g10_data(end);

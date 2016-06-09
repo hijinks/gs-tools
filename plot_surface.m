@@ -12,9 +12,9 @@ function plot_surface(d_sorted)
             d50s = [d50s, prctile(wolmans{wl}, 50)];
             means = [means, mean(wolmans{wl})];
         end
-                
-        d84_plot = plot(x_data, d84s,'xk', 'LineWidth', 1);
-        ylim([0,150]);
+        
+        d84_plot = plot(x_data, d84s,'xk', 'LineWidth', 1, 'markers',12);
+        ylim([0,180]);
         
         lm = fitlm(x_data,d84s,'linear');
         c = lm.Coefficients.Estimate(1);
@@ -39,7 +39,7 @@ function plot_surface(d_sorted)
         c2 = median(d50s);
         yfit = x_data*mx+c;
         yfit2 = x_data*mx2+c2;
-        d50_plot = plot(x_data, d50s,'ok', 'LineWidth', 1);
+        d50_plot = plot(x_data, d50s,'ok', 'LineWidth', 1, 'markers',12);
         
         hold on;
         plot(x_data,yfit,'k--', 'LineWidth', 1);
