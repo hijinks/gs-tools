@@ -68,8 +68,9 @@ for p=1:length(sf_fans);
                 d84_list = [d84_list; prctile(wolmans{j}, 84)];
                 d50_list = [d50_list; prctile(wolmans{j}, 50)];
             end
-            plot(norm_dist, d84_list, line_colour);
-    %         plot(norm_dist, d50_list, line_colour);
+            h = scatter(norm_dist, d84_list, line_colour);
+            
+            %         plot(norm_dist, d50_list, line_colour);
             ylim([0,150]);
             xlim([0,1.1]);
             ylabel('Grain size (mm)');
@@ -81,7 +82,6 @@ end
 if mode
     title('Grain size distribtions for fan surfaces in Death Valley')
     xlabel('Long axis grain size (mm)')
-    legend([last_pink, last_black], {'Holocene & older', 'Modern'}, 'Location', 'SE')
-    set(fig,'XScale','log');
+    legend([last_pink, last_black], {'Mid-Holocene - Late Pleistocene', 'Holocene'}, 'Location', 'SE')
     
 end
