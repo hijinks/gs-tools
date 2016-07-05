@@ -216,11 +216,12 @@ for r=1:length(sigma)
     intsysmeps(r) = 0.5*expsym_change*ss_change;
 end
 
-int_val = abs(sum(intsysmeps));
+int_val = 1/abs(sum(intsysmeps));
 int_constant_ana = freq_no/int_val;
 fraction = expsym*int_constant_ana;
 
 saveData = struct();
+saveData.sim = ss_var;
 saveData.J = J;
 saveData.Jprime = Jprime;
 saveData.phi = phi;
