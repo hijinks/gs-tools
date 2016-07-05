@@ -46,7 +46,9 @@ for fn=1:length(fannames)
                disp([s_names{sn} meta.name meta.site]);
            end
            all_x = [all_x; xp];
-           all_y = [all_y; N];
+           
+           fD = N./sum(N);
+           all_y = [all_y; fD];
            
         end
 
