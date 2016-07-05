@@ -221,6 +221,7 @@ int_constant_ana = freq_no/int_val;
 fraction = expsym*int_constant_ana;
 
 saveData = struct();
+saveData.ss = ss_var;
 saveData.J = J;
 saveData.Jprime = Jprime;
 saveData.phi = phi;
