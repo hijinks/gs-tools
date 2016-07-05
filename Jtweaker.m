@@ -70,7 +70,11 @@ all_y = [];
 for k=1:length(ss)
    [N,edges] = histcounts(ss{k}, ed);
    all_x = [all_x; xp];
-   all_y = [all_y; N];
+   
+   % Frequency Density
+   fD = N./sum(N);
+   
+   all_y = [all_y; fD];
 end
 
 freq_no = numel(all_y);
@@ -216,12 +220,12 @@ for r=1:length(sigma)
     intsysmeps(r) = 0.5*expsym_change*ss_change;
 end
 
-int_val = abs(sum(intsysmeps));
+int_val = sum(intsysmeps);
 int_constant_ana = freq_no/int_val;
-fraction = expsym*int_constant_ana;
+%int_constant_ana = 1/int_val;
+fraction = intsysmeps*int_constant_ana;
 
 saveData = struct();
-saveData.ss = ss_var;
 saveData.J = J;
 saveData.Jprime = Jprime;
 saveData.phi = phi;
