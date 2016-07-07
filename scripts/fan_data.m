@@ -178,12 +178,14 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             ss_data = arrayfun(@(x)((x-m)/stdDev),sorted_data);
             ss_datas{w} = ss_data;
             c1 = coords{w};
+            
             if c1(3)
                x1 = c1(1);
                y1 = c1(2);
             else
                [x1,y1,u1,utm1] = wgs2utm(c1(1),c1(2)); 
             end
+            
             utm_coords = [utm_coords; [x1, y1]];
             d = sqrt((ix-x1)^2+(iy-y1)^2);
             distances = [distances,d];

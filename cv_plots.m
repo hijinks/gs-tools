@@ -3,12 +3,13 @@ addpath('./lib');
 
 fannames = fieldnames(distance_sorted);
 
-X = 15;                  %# A3 paper size
-Y = 10;                  %# A3 paper size
+
+X = 42.0;                  %# A3 paper size
+Y = 29.7;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
-yMargin = 0;               %# bottom/top margins from page borders
+yMargin = 2;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
-ySize = Y - 2*yMargin;     %# figure size on paper (widht c& hieght)
+ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
     
 for fn=1:length(fannames)
     cf = distance_sorted.(fannames{fn});
@@ -76,6 +77,6 @@ for fn=1:length(fannames)
     set(stitle,'position',[0.4 1.0090 0.4]);
     set(gca, 'FontSize', 14);
     
-    print(fig, '-dpdf', ['dump/cv_plots/' fannames{fn} '_predictions' '.pdf'])
+    print(fig, '-dpdf', ['dump/cv_plots/' fannames{fn} '_cv' '.pdf'])
 
 end

@@ -1,11 +1,25 @@
 
-% Normalise distances
+% Fan slope vs. average grain size
+X = 42.0;                  %# A3 paper size
+Y = 29.7;                  %# A3 paper size
+xMargin = 0;               %# left/right margins from page borders
+yMargin = 2;               %# bottom/top margins from page borders
+xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
+ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
+
+
+fig = figure;
+
+set(fig,'Visible','off');
+set(fig, 'PaperSize',[X Y]);
+set(fig, 'PaperPosition',[0 yMargin xSize ySize])
+set(fig, 'PaperUnits','centimeters');
+
+    
 
 surfaces = []
 
 sf_fans = fieldnames(distance_sorted);
-
-fig = figure;
 
 surface_colours;
 
@@ -67,7 +81,11 @@ for w=1:length(sl)
        fan_surface_slopes = [fan_surface_slopes; surface_slopes(k)];
    end
 end
-figure
+
 gscatter(fan_surface_slopes,mean_gs,mean_gs_ages,'br','xo')
 labelpoints(fan_surface_slopes,mean_gs, mean_gs_labels);
+xlabel('Fan surface gradient');
+ylabel('Mean grain size (mm)');
+title('Fan surface average grain size vs. average slope');
 
+print(fig, '-dpdf', ['dump/comparisons/slope_vs_gs' '.pdf'])

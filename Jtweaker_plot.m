@@ -1,9 +1,9 @@
-Y = 10;                  %# A3 paper size
-X = 15;                  %# A3 paper size
+X = 42.0;                  %# A3 paper size
+Y = 29.7;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
-yMargin = 1;               %# bottom/top margins from page borders
+yMargin = 2;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
-ySize = Y - 2*yMargin;     %# figure size on paper (widht c& hieght)
+ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
 
 csv_dir = ['.' filesep 'jfits'];
 
@@ -91,6 +91,15 @@ a_f = 0.8;
 b_f = 0.2;
 c_f = 0.15;
 
+% Mitch
+a_mi = 0.15;
+b_mi = 2.2;
+c_mi = 0.15;
+C1_mi = 0.7;
+C2_mi = 0.88;
+CV_mi = 0.8;
+
+
 f = figure('Menubar','none');
 set(f, 'Position', [0,0, 1200, 800])
 set(f, 'PaperSize',[X Y]);
@@ -100,8 +109,15 @@ set(f, 'Visible', 'off');
 subplot(2,3,1);
 plot(ag, 'x');
 hold on;
+
+% F & P
 plot(1:1:length(ag), ones(1,length(ag)).*a_f, '-k');
 hold on;
+
+% Mitch
+plot(1:1:length(cg), ones(1,length(ag)).*a_mi, '--r');
+hold on;
+
 a_m = mean(ag);
 plot(1:1:length(ag), ones(1,length(ag)).*a_m, '--b');
 ylim([0,1]);
@@ -111,8 +127,15 @@ title('ag');
 subplot(2,3,2);
 plot(bg, 'x');
 hold on;
+
+% F & P
 plot(1:1:length(bg), ones(1,length(ag)).*b_f, '-k');
 hold on;
+
+% Mitch
+plot(1:1:length(cg), ones(1,length(ag)).*b_mi, '--r');
+hold on;
+
 b_m = mean(bg);
 plot(1:1:length(ag), ones(1,length(ag)).*b_m, '--b');
 xlim([1,length(bg)]);
@@ -122,19 +145,32 @@ title('bg');
 subplot(2,3,3);
 plot(cg, 'x');
 hold on;
-plot(1:1:length(cg), ones(1,length(ag)).*c_f, '-k');
+
+% F & P
+p1 = plot(1:1:length(cg), ones(1,length(ag)).*c_f, '-k');
 hold on;
+
+% Mitch
+p2 = plot(1:1:length(cg), ones(1,length(ag)).*c_mi, '--r');
+hold on;
+
 c_m = mean(cg);
-plot(1:1:length(cg), ones(1,length(ag)).*c_m, '--b');
+p3 = plot(1:1:length(cg), ones(1,length(ag)).*c_m, '--b');
 xlim([1,length(cg)]);
 ylim([0 1]);
 title('cg');
+legend([p1,p2,p3], {'Fedele & Paola 2007', 'D''Arcy et al. 2016', 'Sam 2015'});
 
 subplot(2,3,4);
 plot(C1, 'x');
 hold on;
 C1_m = mean(C1);
 plot(1:1:length(C1), ones(1,length(ag)).*C1_m, '--b');
+
+hold on;
+% Mitch
+plot(1:1:length(C1), ones(1,length(ag)).*C1_mi, '--r');
+
 ylim([0 1]);
 title('C1');
 
@@ -143,6 +179,11 @@ plot(C2, 'x');
 hold on;
 C2_m = mean(C2);
 plot(1:1:length(C2), ones(1,length(ag)).*C2_m, '--b');
+
+hold on;
+% Mitch
+plot(1:1:length(C2), ones(1,length(ag)).*C2_mi, '--r');
+
 ylim([0 1.5]);
 title('C2');
 
@@ -151,9 +192,12 @@ plot(CV, 'x');
 hold on;
 CV_m = mean(CV);
 plot(1:1:length(CV), ones(1,length(ag)).*CV_m, '--b');
+
+hold on;
+% Mitch
+plot(1:1:length(CV), ones(1,length(ag)).*CV_mi, '--r');
+
 ylim([0 1.5]);
 title('CV');
-
-%supertitle('Analytical fits')
 
 print(f, '-dpdf', ['dump/jfits.pdf'])

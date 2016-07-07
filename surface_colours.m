@@ -40,7 +40,7 @@ l = 4;
 d = floor(64/l);
 clrs.SR1.A = warm_colours(1*d, :);
 clrs.SR1.B = warm_colours(2*d, :);
-clrs.SR1.C = cold_colours(1*d, :);
+clrs.SR1.C = warm_colours(3*d/4, :);
 clrs.SR1.D = cold_colours(2*d, :);
 
 
@@ -62,5 +62,5 @@ ages.T1.E = 'Pleistocene';
 
 ages.SR1.A = 'Holocene   ';
 ages.SR1.B = 'Holocene   ';
-ages.SR1.C = 'Pleistocene';
+ages.SR1.C = 'Holocene   ';
 ages.SR1.D = 'Pleistocene';
