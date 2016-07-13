@@ -22,7 +22,7 @@ function varargout = Jtweaker(varargin)
 
 % Edit the above text to modify the response to help Jtweaker
 
-% Last Modified by GUIDE v2.5 12-Jul-2016 20:04:19
+% Last Modified by GUIDE v2.5 13-Jul-2016 11:57:28
 % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
@@ -46,6 +46,7 @@ end
 function [J, Jprime, phi, sym, expsym, intsysmeps, sigma, int_val, ...
     int_constant_ana, fraction] = calcFraction(j_params, ss_var, C1, C2)
     
+    disp(j_params);
     jfunc = @(x) (j_params(1)*(exp(-j_params(2)*x))+j_params(3));
 
     J = arrayfun(jfunc, ss_var, 'UniformOutput', true)';
@@ -198,6 +199,9 @@ function [ss_var, fraction, fit_x, fit_y,...
     saveData.int_constant_ana = int_constant_ana;
     saveData.residuals = residuals;
     saveData.resnorm = resnorm;
+    saveData.ag = ag;
+    saveData.bg = bg;
+    saveData.cg = cg;
     
     set(handles.c1_output, 'String', C1_av);
     set(handles.c2_output, 'String', C2_av);
@@ -264,6 +268,92 @@ function Jtweaker_ProcessJValues(handles)
         handles.surface_data, new_ag, new_bg, new_cg, 0);
     
     Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);
+end
+
+function Jtweaker_SaveCharts(handles)
+ 	[file,path] = uiputfile('*.pdf', 'Save Charts', handles.surface_name);
+    X = 21.0;                  %# A4 paper size
+    Y = 29.7;                  %# A4 paper size
+    xMargin = 0;               %# left/right margins from page borders
+    yMargin = 2;               %# bottom/top margins from page borders
+    xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
+    ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
+    f = figure('Menubar','none');
+    set(f, 'Position', [0,0, 1200, 800])
+    set(f, 'PaperSize',[X Y]);
+    set(f, 'PaperPosition',[0 yMargin xSize ySize])
+    set(f, 'PaperUnits','centimeters');
+	set(f, 'Visible', 'off');
+    
+    axes('Position',[.1 .53 .8 .4])
+    p1 = plot(handles.ss,handles.fraction);
+    hold on;
+    p2 = plot(handles.field_x,handles.field_y, 'x-');
+    paramtext = {['\bf{a} ', '\rm', num2str(handles.saveData.ag)], ...
+        ['\bf{b} ', '\rm', num2str(handles.saveData.bg)],...
+        ['\bf{c} ', '\rm', num2str(handles.saveData.cg)]};
+    textLoc(paramtext, 'southwest',...
+        'FontSize', 20);
+    
+    ylabel('f');
+    xlabel('\xi');    
+    legend([p1 p2], {'Non-linear fit', 'Field data'}, 'Location', 'northwest');
+    title(['Self-similarity distrubution and fit (', strrep(handles.surface_name, '_', ' '), ')']);
+    set(gca, 'FontSize', 20);
+    axes('Position',[.7 .7 .15 .15])
+    box on
+    
+    plot(handles.field_x, handles.saveData.residuals, 'bx-');
+    ylim([-0.1,0.1]);
+    title('Residuals');
+    textLoc(['Resnorm ',num2str(handles.saveData.resnorm)], 'northwest', ...
+        'FontSize', 20);
+    
+    xlabel('\xi');
+    
+    axes('Position',[.1 .1 .8 .35])
+    if isstruct(handles.saveData)
+        p4 = plot(handles.saveData.ss_var,handles.saveData.J, 'bx-');
+        hold on;
+        
+        %     Plot original Fedele & Paola curve
+        a = 0.9;
+        b = 0.2;
+        c = 0.15;
+        jfunc = @(x) (a*(exp(-b*x))+c);
+        J = arrayfun(jfunc, handles.saveData.ss_var, 'UniformOutput', true)';
+        p5 = plot(handles.saveData.ss_var, J, 'kx-');
+        hold on;
+     
+        [J_fp_d50, ss_fp_d50] = jplot_ss(handles.surface_data, a,...
+            b , c, 'd50');
+        [J_fp_d84, ss_fp_d84] = jplot_ss(handles.surface_data, a,...
+            b , c, 'd84');
+ 
+        
+        [J_d84, ss_d84] = jplot_ss(handles.surface_data, handles.saveData.ag,...
+            handles.saveData.bg , handles.saveData.cg, 'd84');
+        [J_d50, ss_d50] = jplot_ss(handles.surface_data, handles.saveData.ag,...
+            handles.saveData.bg , handles.saveData.cg, 'd50');
+       
+        p6 = plot(ss_d50, J_d50, 'ko', 'MarkerSize',9,'MarkerFaceColor','auto');
+        hold on;
+        p7 = plot(ss_d84, J_d84, 'ro', 'MarkerSize',9,'MarkerFaceColor','auto');
+        hold on;
+        p8 = plot(ss_fp_d50, J_fp_d50, 'ko', 'MarkerSize',9,'MarkerFaceColor','auto');
+        hold on;
+        p9 = plot(ss_fp_d84, J_fp_d84, 'ro', 'MarkerSize',9,'MarkerFaceColor','auto');
+        
+        set(gca,'yscale','log');
+        title(['Self-similar relative mobility curves (', strrep(handles.surface_name, '_', ' '), ')']);
+        legend([p4 p5, p6, p7], {'Field data fit', 'Fedele & Paola fit', 'D84', 'D50'}, ...
+            'Location', 'northeast');
+        ylabel('J');
+        xlabel('\xi');
+    end
+    set(gca, 'FontSize', 20);
+	print(f, '-dpdf',[path,file])
+
 end
 
 % --- Executes just before Jtweaker is made visible.
@@ -605,4 +695,13 @@ function nonlinearfitbtn_Callback(hObject, eventdata, handles)
         handles.surface_data, new_ag, new_bg, new_cg, 1);
     
     Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);
+end
+
+
+% --- Executes on button press in saveCharts.
+function saveCharts_Callback(hObject, eventdata, handles)
+% hObject    handle to saveCharts (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    Jtweaker_SaveCharts(handles);
 end

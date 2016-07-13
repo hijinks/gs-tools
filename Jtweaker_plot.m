@@ -1,5 +1,5 @@
-X = 42.0;                  %# A3 paper size
-Y = 29.7;                  %# A3 paper size
+X = 29.7;                  %# A3 paper size
+Y = 21.0;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
 yMargin = 2;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
@@ -20,65 +20,88 @@ row_names = cell(length(dir_search),1);
 fnames = {};
 fan_categories = {};
 surfaces = {};
+f1 = figure;
+colormap winter
+
 for j=1:(length(dir_search)),
     [pathstr,fname,ext] = fileparts(dir_search(j).name);
     if strcmp(ext,'.csv') > 0
         row_names{j} = fname;
         fnames{j} = fname;
-        d = strsplit(fname, '_')
-        fan_categories{j} = d{1};
-        surfaces{j} = d{2};
-        delimiter = ',';
-        startRow = 2;
-        
-        formatSpec = '%f%f%f%f%f%f%f%f%f%q%q%q%q%q%q%q%[^\n\r]';
+        if isempty(fname) < 1
 
-        %% Open the text file.
-        fileID = fopen(dir_search(j).name,'r');
+            d = strsplit(fname, '_')
+            fan_categories = [fan_categories, fname];
+            surfaces = [surfaces, d{2}];
+            delimiter = ',';
+            startRow = 2;
 
-        textscan(fileID, '%[^\n\r]', startRow-1, 'WhiteSpace', '', 'ReturnOnError', false);
-        dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'ReturnOnError', false);
+            formatSpec = '%f%f%f%f%f%f%f%f%f%q%q%q%q%q%q%q%[^\n\r]';
 
-        fclose(fileID);
+            %% Open the text file.
+            fileID = fopen(dir_search(j).name,'r');
 
-    %     J1 = dataArray{:, 1};
-    %     Jprime1 = dataArray{:, 2};
-    %     phi1 = dataArray{:, 3};
-    %     sym1 = dataArray{:, 4};
-    %     sigma2 = dataArray{:, 5};
-    %     expsym1 = dataArray{:, 6};
-    %     intsysmeps1 = dataArray{:, 7};
-    %     fraction1 = dataArray{:, 8};
-    %     ss_var1 = dataArray{:, 9};
-    %     int_constant_ana1 = dataArray{:, 10};
-    %     ag1 = dataArray{:, 11};
-    %     bg1 = dataArray{:, 12};
-    %     cg1 = dataArray{:, 13};
-    %     C3 = dataArray{:, 14};
-    %     C4 = dataArray{:, 15};
-    %     CV2 = dataArray{:, 16};
+            textscan(fileID, '%[^\n\r]', startRow-1, 'WhiteSpace', '', 'ReturnOnError', false);
+            dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'ReturnOnError', false);
 
-        aglist = dataArray{1, 11};
-        ag(j) = str2double(aglist{1});
+            fclose(fileID);
 
-        bglist = dataArray{1, 12};
-        bg(j) = str2double(bglist{1});
+             J1 = dataArray{:, 1};
+        %     Jprime1 = dataArray{:, 2};
+        %     phi1 = dataArray{:, 3};
+        %     sym1 = dataArray{:, 4};
+        %     sigma2 = dataArray{:, 5};
+        %     expsym1 = dataArray{:, 6};
+        %     intsysmeps1 = dataArray{:, 7};
+        %     fraction1 = dataArray{:, 8};
+             ss_var1 = dataArray{:, 9};
+        %     int_constant_ana1 = dataArray{:, 10};
+        %     ag1 = dataArray{:, 11};
+        %     bg1 = dataArray{:, 12};
+        %     cg1 = dataArray{:, 13};
+        %     C3 = dataArray{:, 14};
+        %     C4 = dataArray{:, 15};
+        %     CV2 = dataArray{:, 16};
+            pv = plot(ss_var1, J1);
+            title('Self-similar relative mobility curves');
+            set(gca,'yscale','log');
+            set(gca,'fontsize',14);
+            ylabel('J');
+            xlabel('\xi');
+            xlim([-5,5]);
+            hold on;
+            
+            aglist = dataArray{1, 11};
+            ag(j) = str2double(aglist{1});
 
-        cglist = dataArray{1, 13};
-        cg(j) = str2double(cglist{1});
+            bglist = dataArray{1, 12};
+            bg(j) = str2double(bglist{1});
 
-        c1list = dataArray{1, 14};
-        C1(j) = str2double(c1list{1});
+            cglist = dataArray{1, 13};
+            cg(j) = str2double(cglist{1});
 
-        c2list = dataArray{1, 15};
-        C2(j) = str2double(c2list{1});
+            c1list = dataArray{1, 14};
+            C1(j) = str2double(c1list{1});
 
-        cvlist = dataArray{1, 16};
-        CV(j) = str2double(cvlist{1});
+            c2list = dataArray{1, 15};
+            C2(j) = str2double(c2list{1});
 
-        clearvars filename delimiter startRow formatSpec fileID dataArray ans;
+            cvlist = dataArray{1, 16};
+            CV(j) = str2double(cvlist{1});
+
+            clearvars filename delimiter startRow formatSpec fileID dataArray ans;
+        end
     end
 end
+
+a = 0.9;
+b = 0.2;
+c = 0.15;
+jfunc = @(x) (a*(exp(-b*x))+c);
+J = arrayfun(jfunc, ss_var1, 'UniformOutput', true)';
+p5 = plot(ss_var1, J, 'k--');
+legend([p5, pv], {'Fedele & Paola 2007', 'Surface fits'});
+print(f1, '-dpdf', ['dump/allfits2.pdf'])
 
 fnames = fnames(~cellfun('isempty',fnames));
 ag(isnan(ag)) = [];
@@ -89,6 +112,9 @@ C2(isnan(C2)) = [];
 CV(isnan(CV)) = [];
 
 T = table(ag,bg,cg,C1,C2,CV,'RowNames',fnames');
+
+
+
 
 % Fedele & Paola 2007
 a_f = 0.8;
@@ -111,10 +137,11 @@ set(f, 'PaperPosition',[0 yMargin xSize ySize])
 set(f, 'PaperUnits','centimeters');
 set(f, 'Visible', 'off');
 subplot(2,3,1);
-gscatter(1:1:length(ag),ag,fan_categories');
+gscatter(1:1:length(ag),ag,fan_categories', '', '', '', 'off');
+set(gca,'fontsize',14);
 labelpoints(1:1:length(ag),ag,surfaces');
-set(gca,'xticklabel',{[]});
 
+set(gca,'xticklabel',{[]});
 hold on;
 
 % F & P
@@ -133,13 +160,16 @@ title('ag');
 textbp('Non-linear fit');
 
 subplot(2,3,2);
+set(gca,'fontsize',14);
 gscatter(1:1:length(bg),bg,fan_categories');
 labelpoints(1:1:length(bg),bg,surfaces');
 set(gca,'xticklabel',{[]});
 hold on;
 
 % F & P
+
 plot(0:1:length(bg)+1, ones(1,length(bg)+2).*b_f, '-k');
+
 hold on;
 
 % Mitch
@@ -149,12 +179,14 @@ hold on;
 b_m = mean(bg);
 plot(0:1:length(bg)+1, ones(1,length(bg)+2).*b_m, '--b');
 xlim([0,length(bg)+1]);
+
 ylim([0 5]);
 title('bg');
 textbp('Non-linear fit');
 
 subplot(2,3,3);
-gscatter(1:1:length(cg),cg,fan_categories');
+gscatter(1:1:length(cg),cg,fan_categories', '', '', '', 'off');
+set(gca,'fontsize',14);
 labelpoints(1:1:length(cg),cg,surfaces');
 set(gca,'xticklabel',{[]});
 hold on;
@@ -176,7 +208,8 @@ legend([p1,p2,p3], {'Fedele & Paola 2007', 'D''Arcy et al. 2016', 'Sam 2015 (Ave
 textbp('Non-linear fit');
 
 subplot(2,3,4);
-gscatter(1:1:length(C1),C1,fan_categories');
+gscatter(1:1:length(C1),C1,fan_categories', '', '', '', 'off');
+set(gca,'fontsize',14);
 labelpoints(1:1:length(C1),C1,surfaces');
 set(gca,'xticklabel',{[]});
 
@@ -193,7 +226,8 @@ title('C1');
 textbp('Fixed');
 
 subplot(2,3,5);
-gscatter(1:1:length(C2),C2,fan_categories');
+gscatter(1:1:length(C2),C2,fan_categories', '', '', '', 'off');
+set(gca,'fontsize',14);
 labelpoints(1:1:length(C2),C2,surfaces');
 set(gca,'xticklabel',{[]});
 
@@ -210,7 +244,8 @@ title('C2');
 textbp('Field Derived');
 
 subplot(2,3,6);
-gscatter(1:1:length(CV),CV,fan_categories');
+gscatter(1:1:length(CV),CV,fan_categories', '', '', '', 'off');
+set(gca,'fontsize',14);
 labelpoints(1:1:length(CV),CV,surfaces');
 set(gca,'xticklabel',{[]});
 hold on;

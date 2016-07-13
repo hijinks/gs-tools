@@ -1,7 +1,7 @@
 addpath('./scripts');
 addpath('./lib');
 
-output_path = 'dump/'
+output_path = 'dump/';
 % Self similarity plots
 fan_names = {'G8', 'G10', 'T1', 'SR1'};
 color_map = [[1.0000    0.6000    0.6000]; [0.8000    0.8000    1.0000]; [ 0.6000    0.6000    1.0000]; [0.2039 0.3020 0.4941]; [0.8196    0.8196    0.8510]; [0 0 0]];
@@ -77,9 +77,7 @@ for fn=1:length(fannames)
     end
     textLoc(fannames{fn}, 'northeast');
     ylim([0,.6])
-    
-    
- 
+
 end
 
 set(ha(1:2),'XTickLabel',''); set(ha(2),'YTickLabel',''); set(ha(4),'YTickLabel','')
