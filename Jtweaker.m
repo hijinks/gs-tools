@@ -22,7 +22,7 @@ function varargout = Jtweaker(varargin)
 
 % Edit the above text to modify the response to help Jtweaker
 
-% Last Modified by GUIDE v2.5 07-Jul-2016 15:42:15
+% Last Modified by GUIDE v2.5 12-Jul-2016 20:04:19
 % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
@@ -102,7 +102,7 @@ end
 
 function [ss_var, fraction, fit_x, fit_y,...
     field_x, field_y, saveData] =  Jtweaker_Process(handles, ds_surface, surface_data, ag, bg, cg, FIT)
-
+        
     s_mean = [];
     s_stdev = [];
 
@@ -163,11 +163,8 @@ function [ss_var, fraction, fit_x, fit_y,...
 	end
     
     if FIT > 0
-        
-        [v,resnorm,residual] = lsqcurvefit(@fractionOnly,[ag,bg,cg], field_x, field_y', [1e-4,1e-4,1e-4])
-        
-        disp(resnorm)
-        disp(residual)
+        [v,resnorm,residuals] = lsqcurvefit(@fractionOnly,[ag,bg,cg], field_x, ...
+            field_y', [1e-4,1e-4,1e-4]);
         
         ag = v(1);
         bg = v(2);
@@ -180,6 +177,9 @@ function [ss_var, fraction, fit_x, fit_y,...
         set(handles.bg_output,'String', bg)
         set(handles.cg_output,'String', cg) 
         
+    else
+       residuals = [];
+       resnorm = [];
     end
     
     [J, Jprime, phi, sym, expsym, intsysmeps, sigma, int_val, ...
@@ -196,7 +196,9 @@ function [ss_var, fraction, fit_x, fit_y,...
     saveData.fraction = fraction;
     saveData.ss_var = ss_var';
     saveData.int_constant_ana = int_constant_ana;
-
+    saveData.residuals = residuals;
+    saveData.resnorm = resnorm;
+    
     set(handles.c1_output, 'String', C1_av);
     set(handles.c2_output, 'String', C2_av);
     set(handles.cv_output, 'String', CV);
@@ -223,6 +225,12 @@ function Jtweaker_ProbabilityPlot(handles)
         J = arrayfun(jfunc, handles.saveData.ss_var, 'UniformOutput', true)';
         p5 = plot(handles.saveData.ss_var, J, 'kx-');
         set(gca,'yscale','log')
+        
+        axes(handles.axes3)
+        p6 = plot(handles.saveData.residuals, 'bx-');
+        
+        set(handles.resnorm_label,'String', handles.saveData.resnorm) 
+        
     end
 
 end
@@ -560,18 +568,18 @@ function save_data_btn_Callback(hObject, eventdata, handles)
 end
 
 
-function edit7_Callback(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
+function resnorm_Callback(hObject, eventdata, handles)
+% hObject    handle to resnorm (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit7 as text
-%        str2double(get(hObject,'String')) returns contents of edit7 as a double
+% Hints: get(hObject,'String') returns contents of resnorm as text
+%        str2double(get(hObject,'String')) returns contents of resnorm as a double
 end
 
 % --- Executes during object creation, after setting all properties.
-function edit7_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
+function resnorm_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to resnorm (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

@@ -15,6 +15,7 @@ set(f, 'PaperUnits','centimeters');
 set(f, 'Visible', 'off');
 
 surface_colours;
+[apex_data] = fan_apexes;
 
 output_path = 'dump/comparisons/'
 % Downstream fining plots
@@ -61,8 +62,13 @@ for fn=1:length(fannames)
                 surface_wolmans = [surface_wolmans,surface_wolman];
                 len = length(surface(:,1));
                 distances = cell2mat(surface(:,1));
+                sites = cell2mat(surface(:,3));
+                
+                [apex_distance, relative_distances] = fan_apex_relative(sites, ...
+                    apex_data.(fan_name), origins.(fan_name)); 
+                
                 max_dist = max(distances);
-                norm_dist = distances./max_dist;
+                norm_dist = distances;
                 wolmans = cell2mat(surface(:,2)');
                 d84s = zeros(1,len);
                 errors = zeros(1,len);
@@ -70,11 +76,13 @@ for fn=1:length(fannames)
                     d84s(1,j) = prctile(wolmans(:,j), 84);
                     errors = (prctile(wolmans(:,j), 90)-prctile(wolmans(:,j), 80))/2;
                 end
-                d = boundedline(norm_dist, d84s, errors, '-x', 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}))
+                d = boundedline(norm_dist, d84s, errors, '-x', 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
                 ylim([0,150]);
-                xlim([0,1.1]);
+%                 xlim([0,1.1]);
                 xlabel('Normalised downstream distance');
                 ylabel('Grain size (mm)');
+                hold on;
+                plot([apex_distance,apex_distance], [-10,200], 'k-');
                 hold on;
                 legend_labels = [legend_labels surface_names{sn}];
                 legend_items = [legend_items,d];

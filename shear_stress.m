@@ -33,6 +33,7 @@ fan_surface_medians = struct();
 fan_surface_means = struct();
 fan_surface_distances = struct();
 fan_surface_ages = struct();
+fan_surface_site_locations = struct();
 
 for p=1:length(sf_fans)
     
@@ -44,12 +45,14 @@ for p=1:length(sf_fans)
     surface_means_all = struct();
     surface_medians_all = struct();
     surface_distances_all = struct();
+    surface_site_locations_all = struct();
     surface_ages = struct();
     
     for s=1:length(current_fan_surfaces)
         current_surface = current_fan.(current_fan_surfaces{s});
         surface_names{s} = current_fan_surfaces{s};
         surface_distances = zeros(length(current_surface), 1);
+        surface_site_locations = zeros(length(current_surface), 1);
         surface_means = zeros(length(current_surface), 1);
         surface_medians = zeros(length(current_surface), 1);
         
@@ -67,11 +70,13 @@ for p=1:length(sf_fans)
         surface_medians_all.(current_fan_surfaces{s}) = surface_medians;
         surface_means_all.(current_fan_surfaces{s}) = surface_means;
         surface_ages.(current_fan_surfaces{s}) = ages.(sf_fans{p}).(current_fan_surfaces{s});
+        surface_site_locations_all.(current_fan_surfaces{s}) = cell2mat(current_surface(:,3));
     end
     
     fan_surface_medians.(sf_fans{p}) = surface_medians_all;
     fan_surface_means.(sf_fans{p}) = surface_means_all;
     fan_surface_distances.(sf_fans{p}) = surface_distances_all;
+    fan_surface_site_locations.(sf_fans{p}) = surface_site_locations_all;
     fan_surface_ages.(sf_fans{p}) = surface_ages;
 end
 
@@ -105,6 +110,8 @@ areas = width*h;
 radius = areas/perimeter;
 g = 9.8;
 
+[apex_data] = fan_apexes;
+
 figure;
 
 for f=1:length(fan_names)
@@ -116,6 +123,11 @@ for f=1:length(fan_names)
        colour = clrs.(fan_name).(surface_name);
        
        s_distance = fan_surface_distances.(fan_name).(surface_name);
+       s_sites = fan_surface_site_locations.(fan_name).(surface_name);
+       
+       [apex_distance, relative_distances] = fan_apex_relative(s_sites, ...
+           apex_data.(fan_name), origins.(fan_name));
+       
 %        s_distance = s_distance./max(s_distance);
        s_means = fan_surface_means.(fan_name).(surface_name);
        s_medians = fan_surface_medians.(fan_name).(surface_name);
@@ -124,7 +136,14 @@ for f=1:length(fan_names)
        gen_c = sin(s_slope) * rho_w * g * radius;
        tau_c = gen_c ./ (rho_g - rho_w) * g .* (s_medians/1000);
        
-       plot(s_distance, tau_c, 'x', 'Color', colour);
+       f = fit(relative_distances, tau_c,'poly1');
+       %fy = f.p1.*relative_distances.^2 + f.p2.*relative_distances + f.p3;
+       fy = f.p1.*relative_distances + f.p2;
+       plot(relative_distances, tau_c, 'x', 'Color', colour);
+       hold on;
+%        plot(relative_distances, fy, '-', 'Color', colour);
+%        hold on;
+       plot([0,0], [0,1], 'k-');
        hold on;
        
     end

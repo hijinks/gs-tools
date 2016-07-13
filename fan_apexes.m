@@ -14,6 +14,7 @@ function [apex_data] = fan_apexes
     
     apex_data = struct();
     for p = 1:length(Name)
-        apex_data.(strtrim(Name{p})) = wgs2utm(Latitude(p), Longitude(p));
+        [nx, ny, utm] = wgs2utm(Latitude(p), Longitude(p));
+        apex_data.(strtrim(Name{p})) = [nx, ny];
     end
 end
