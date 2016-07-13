@@ -15,8 +15,6 @@ set(fig, 'PaperSize',[X Y]);
 set(fig, 'PaperPosition',[0 yMargin xSize ySize])
 set(fig, 'PaperUnits','centimeters');
 
-    
-
 surfaces = []
 
 sf_fans = fieldnames(distance_sorted);
@@ -78,7 +76,7 @@ for w=1:length(sl)
    surface_slopes = [];
    for k=1:length(surface_labels)
        surface_slopes(k) = abs(slope_data.(sl{w}).(surface_labels{k}){3}.Coefficients.Estimate(2));
-       fan_surface_slopes = [fan_surface_slopes; surface_slopes(k)];
+       fan_surface_slopes = [fan_surface_slopes; atan(surface_slopes(k))];
    end
 end
 
