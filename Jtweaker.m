@@ -202,6 +202,8 @@ function [ss_var, fraction, fit_x, fit_y,...
     saveData.ag = ag;
     saveData.bg = bg;
     saveData.cg = cg;
+    saveData.mean = s_mean;
+    saveData.stdev = s_stdev;
     
     set(handles.c1_output, 'String', C1_av);
     set(handles.c2_output, 'String', C2_av);

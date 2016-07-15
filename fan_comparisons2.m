@@ -10,10 +10,7 @@ ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
 
 fig = figure;
 
-set(fig,'Visible','off');
-set(fig, 'PaperSize',[X Y]);
-set(fig, 'PaperPosition',[0 yMargin xSize ySize])
-set(fig, 'PaperUnits','centimeters');
+
 
 surfaces = []
 

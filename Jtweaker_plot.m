@@ -62,14 +62,17 @@ for j=1:(length(dir_search)),
         %     C3 = dataArray{:, 14};
         %     C4 = dataArray{:, 15};
         %     CV2 = dataArray{:, 16};
+        
+        
             pv = plot(ss_var1, J1);
             title('Self-similar relative mobility curves');
             set(gca,'yscale','log');
             set(gca,'fontsize',14);
             ylabel('J');
             xlabel('\xi');
-            xlim([-5,5]);
+            xlim([-2,5]);
             hold on;
+            
             
             aglist = dataArray{1, 11};
             ag(j) = str2double(aglist{1});
@@ -135,7 +138,7 @@ set(f, 'Position', [0,0, 1200, 800])
 set(f, 'PaperSize',[X Y]);
 set(f, 'PaperPosition',[0 yMargin xSize ySize])
 set(f, 'PaperUnits','centimeters');
-set(f, 'Visible', 'off');
+% set(f, 'Visible', 'off');
 subplot(2,3,1);
 gscatter(1:1:length(ag),ag,fan_categories', '', '', '', 'off');
 set(gca,'fontsize',14);
@@ -259,4 +262,4 @@ xlim([0,length(CV)+1]);
 ylim([0 1.5]);
 title('CV');
 textbp('Field Derived');
-print(f, '-dpdf', ['dump/jfits2.pdf'])
+% print(f, '-dpdf', ['dump/jfits2.pdf'])

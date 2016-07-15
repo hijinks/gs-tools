@@ -103,16 +103,14 @@ fan_names = fieldnames(fan_surface_means);
 rho_w = 1000; % kg/m3 water
 rho_g = 1680 % kg/m3 gravel
 
-h = .2; % m
-width = 2;
+h = .3; % m
+width = 10;
 perimeter = 2*h*width;
 areas = width*h;
 radius = areas/perimeter;
 g = 9.8;
 
 [apex_data] = fan_apexes;
-
-figure;
 
 for f=1:length(fan_names)
     fan_name = fan_names{f};
@@ -133,21 +131,29 @@ for f=1:length(fan_names)
        s_medians = fan_surface_medians.(fan_name).(surface_name);
        s_slope = abs(fan_surface_slopes.(fan_name).(surface_name));
 
-       gen_c = sin(s_slope) * rho_w * g * radius;
-       tau_c = gen_c ./ (rho_g - rho_w) * g .* (s_medians/1000);
+       gen_c = sin(s_slope) * rho_w * g * radius; % General fluid mobility
+       tau_c = gen_c ./ (rho_g - rho_w) * g .* (s_medians/1000); % Critical shear
        
-       f = fit(relative_distances, tau_c,'poly1');
-       %fy = f.p1.*relative_distances.^2 + f.p2.*relative_distances + f.p3;
-       fy = f.p1.*relative_distances + f.p2;
+%        f = fit(relative_distances, tau_c,'poly1');
+%        fy = f.p1.*relative_distances.^2 + f.p2.*relative_distances + f.p3;
+%        fy = f.p1.*relative_distances + f.p2;
+
        plot(relative_distances, tau_c, 'x', 'Color', colour);
        hold on;
 %        plot(relative_distances, fy, '-', 'Color', colour);
 %        hold on;
        plot([0,0], [0,1], 'k-');
        hold on;
+       xlabel('Relative distance from fan apex (m)');
+       ylabel('\tau^*');
+       set(gca, 'FontSize', 14);
+       title('Critical shear stress downstream of fan surfaces')
        
     end
 end
+params = {['\bf{\rho}_w \rm', num2str(rho_w)],['\bf{\rho}_s \rm', num2str(rho_g)],['\bf{h} \rm', num2str(h)], ...
+     ['\bf{width} \rm', num2str(width)],['\bf{radius} \rm', num2str(radius)], ['\bf{g} \rm', num2str(g)]};
+textLoc(params, 'northwest')
 
 % gscatter(fan_surface_slopes,tau_c,mean_gs_ages,'br','xo')
 % labelpoints(fan_surface_slopes,tau_c, mean_gs_labels);
@@ -155,3 +161,4 @@ end
 % ylabel('Mean grain size (mm)');
 % title('Fan surface average grain size vs. average slope');
 
+print(fig, '-dpdf', ['dump/comparisons/critical_shear' '.pdf'])

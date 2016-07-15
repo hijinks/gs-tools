@@ -23,7 +23,7 @@ fan_names = {'G8', 'G10', 'T1', 'SR1'};
 line_styles = {'-','-k','-g','-r','-b','-c'};
 point_styles = {'xm','xk','xg','xr','xb','xc'};
 line_point_styles = {'x-','xk-','xg-','xr-','xb-','xc-'};
-fans = {g8_data, g10_data, t1_data, 'sr1_data'};
+fans = {g8_data, g10_data, t1_data, sr1_data};
 
 % Normalised downstream fining for each surface
 
