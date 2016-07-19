@@ -263,3 +263,8 @@ ylim([0 1.5]);
 title('CV');
 textbp('Field Derived');
 % print(f, '-dpdf', ['dump/jfits2.pdf'])
+
+disp(a_m);
+disp(b_m);
+disp(c_m);
+
