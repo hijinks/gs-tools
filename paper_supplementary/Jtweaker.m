@@ -179,8 +179,8 @@ function [ss_var, fraction, fit_x, fit_y,...
         set(handles.cg_output,'String', cg) 
         
     else
-       residuals = [];
-       resnorm = [];
+       residuals = 0;
+       resnorm = 0;
     end
     
     [J, Jprime, phi, sym, expsym, intsysmeps, sigma, int_val, ...
@@ -435,8 +435,15 @@ function a_val_slider_Callback(hObject, eventdata, handles)
 
   val = get(hObject,'Value');
   set(handles.ag_output,'String', num2str(val))
-  Jtweaker_ProcessJValues(handles);
-end
+  new_ag = get(handles.a_val_slider, 'Value');
+  new_bg = get(handles.bg_val_slider, 'Value');
+  new_cg = get(handles.cg_val_slider, 'Value');
+    
+  [ss, fraction, field_x, field_y,...
+      fit_x, fit_y, saveData] = Jtweaker_Process(handles, handles.ds_surface, ...
+      handles.surface_data, new_ag, new_bg, new_cg, 0);
+    
+  Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);end
 
 % --- Executes during object creation, after setting all properties.
 function a_val_slider_CreateFcn(hObject, eventdata, handles)
@@ -458,7 +465,15 @@ function bg_val_slider_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
     val = get(hObject,'Value');
     set(handles.bg_output,'string', num2str(val))
-    Jtweaker_ProcessJValues(handles);
+  new_ag = get(handles.a_val_slider, 'Value');
+  new_bg = get(handles.bg_val_slider, 'Value');
+  new_cg = get(handles.cg_val_slider, 'Value');
+    
+  [ss, fraction, field_x, field_y,...
+      fit_x, fit_y, saveData] = Jtweaker_Process(handles, handles.ds_surface, ...
+      handles.surface_data, new_ag, new_bg, new_cg, 0);
+    
+  Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -482,7 +497,16 @@ function cg_val_slider_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
   val = get(hObject,'Value');
   set(handles.cg_output,'string', num2str(val))
-  Jtweaker_ProcessJValues(handles);
+
+  new_ag = get(handles.a_val_slider, 'Value');
+  new_bg = get(handles.bg_val_slider, 'Value');
+  new_cg = get(handles.cg_val_slider, 'Value');
+    
+  [ss, fraction, field_x, field_y,...
+      fit_x, fit_y, saveData] = Jtweaker_Process(handles, handles.ds_surface, ...
+      handles.surface_data, new_ag, new_bg, new_cg, 0);
+    
+  Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -641,18 +665,17 @@ function save_data_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to save_data_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-%     [file,path]  = uiputfile('*.csv', 'Save Data', handles.surface_name);
-    path = 'data/jfits_auto/'
-    file = [handles.surface_name,'.csv'];
+%    [file,path]  = uiputfile('*.csv', 'Save Data', handles.surface_name);
+     path = 'data/jfits_auto/'
+     file = [handles.surface_name,'.csv'];
     saveData = handles.saveData;
-    disp(handles)
     a = get(handles.ag_output,'String');
     b = get(handles.bg_output,'String');
     c = get(handles.cg_output,'String');
     c1 = get(handles.c1_output,'String');
     c2 = get(handles.c2_output,'String');
     cV = get(handles.cv_output,'String');
-
+    disp(saveData)
     saveData.ag        = a;
     saveData.bg        = b;
     saveData.cg        = c;
