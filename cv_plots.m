@@ -54,7 +54,7 @@ for fn=1:length(fannames)
         plot(distance, cv, 'x');
         ylim([0,1.2])
         xlabel('Distance (m)');
-        ylabel('Grain size(mm)');
+        ylabel('Cv');
         
         hold on;
 
