@@ -31,6 +31,9 @@ set(f, 'Visible', 'off');
 
 meta;
 
+fdata = struct('G8', struct('A', fans{1}{1}, 'B', fans{1}{2}, 'C', fans{1}{3}, ...
+    'D', fans{1}{4}), 'G10', struct('A', fans{2}{1}, 'B', fans{2}{2}, 'C', fans{2}{3}, ...
+    'D', fans{2}{4}), 'T1', struct('A', fans{3}{1}, 'C', fans{3}{2}, 'E', fans{3}{3}));
 subplotNumbers = struct('G8', [1,4,7,10], 'G10', [2,5,8,11], 'T1', [3,6,9,21]);
 ha = tight_subplot(4, 3, [.015 .015], [.05 .05], [.15 .05]);
 fan_abc = struct('G8', struct(), 'G10', struct(), 'T1', struct());
@@ -53,12 +56,12 @@ for j=1:(length(dir_search)),
         fnames{j} = fname;
         if isempty(fname) < 1
 
-            d = strsplit(fname, '_')
+            d = strsplit(fname, '_');
             fan_categories = [fan_categories, fname];
             surfaces = [surfaces, d{2}];
             delimiter = ',';
             startRow = 2;
-
+            surface_data = fdata.(d{1}).(d{2});
             formatSpec = '%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%[^\n\r]';
 
 
@@ -68,9 +71,11 @@ for j=1:(length(dir_search)),
             
             textscan(fileID, '%[^\n\r]', startRow-1, 'WhiteSpace', '', 'ReturnOnError', false);
             dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'ReturnOnError', false);
-
+            
             fclose(fileID);
 
+            ss = surface_data.ss;
+    
              J1 = dataArray{:, 1};
              model_fraction = str2double(dataArray{:, 8});
              ss_var1 = str2double(dataArray{:, 9});
@@ -110,6 +115,18 @@ for j=1:(length(dir_search)),
             all_a = [all_a; ag];
             all_b = [all_b; bg];
             all_c = [all_c; cg];
+
+            ed = -5.5:.5:5.5;
+            xp = [-5:.5:5.5];
+
+            for k=1:length(ss)
+               [N,edges] = histcounts(ss{k}, xp);
+
+               % Frequency Density
+               fD = N./sum(N);
+               plot(edges(1:end-1), fD, 'Color', [.8,.8,.8])
+               hold on;
+            end
             
             pv = plot(field_ss, field_fraction, 'xb--');
             hold on;
@@ -121,6 +138,7 @@ for j=1:(length(dir_search)),
                 labels = {};
             end
             
+            
             items = [items, clrs.(d{1}).(d{2})];
             labels = [labels, d{2}, ''];
             fan_legends.(d{1}).('items') = items;
@@ -128,7 +146,7 @@ for j=1:(length(dir_search)),
             
             set(gca,'fontsize',8);
             xlim([-6,6]);
-            ylim([0, .3]);
+            ylim([0, .5]);
             if pos == 4
                 xlabel('\xi');
             else
@@ -188,7 +206,7 @@ end
 axes(ha(12));
 M = mean(all_fits,2)
 plot(ss_var1, M, 'k', 'LineWidth', 1);
-ylim([0 .3]);
+ylim([0 .5]);
 textLoc('Average Fit', 'northwest');
 set(gca,'YTicklabels',[]);
 xlabel('\xi');
@@ -196,5 +214,5 @@ set(gca,'fontsize',8);
 xlim([-6,6]);
 abc_params = ['\bf a\rm: ' num2str(sprintf('%.2f',mean(all_a))) '\bf b\rm: ' num2str(sprintf('%.2f',mean(all_b))) '\bf c\rm: ' num2str(sprintf('%.2f',mean(all_c)))];
 textLoc(abc_params, 'northeast', 'FontSize', 8);
-print(f, '-dpdf', ['pdfs/figure_5' '.pdf'])
-print(f, '-depsc', ['pdfs/figure_5' '.eps'])
+print(f, '-dpdf', ['pdfs/figure_5' '.pdf']);
+print(f, '-depsc', ['pdfs/figure_5' '.eps']);

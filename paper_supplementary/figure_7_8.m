@@ -121,7 +121,7 @@ for j=1:(length(dir_search)),
             fit_fraction = [fit_fraction,fraction1];
             fit_ss = [fit_ss, ss_var1];
             axes(ha(spp(1)));
-            p1 = plot(ss_vars, J_vals, '-', 'Color', [.7,.7,.7] );
+            p1 = plot(ss_vars, J_vals, '-', 'Color', clrs.(d{1}).(d{2}) );
             xlim([-2 5]);
             ylim([0 3]);
             hold on;
@@ -130,7 +130,7 @@ for j=1:(length(dir_search)),
             plot(ss_padding, ones(1, length(ss_padding))*min(J_vals), ':', 'Color', [.7,.7,.7]);
             hold on;
             axes(ha(spp(2)));
-            p2 = plot(gs_predict, J_vals, '-', 'Color', [.7,.7,.7] );
+            p2 = plot(gs_predict, J_vals, '-', 'Color', clrs.(d{1}).(d{2}) );
             ylim([0 3]);
             hold on;
             gs_predict(isinf(gs_predict)) = [];

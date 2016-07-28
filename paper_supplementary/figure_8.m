@@ -55,6 +55,8 @@ ha = tight_subplot(3, 2, [.02 .01], [.1 .05], [.15 .05]);
 plot_titles = {};
 
 J_1 = struct('G8', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'G10', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'T1', struct('A', 0, 'C', 0, 'E', 0));
+stdev_s = struct('G8', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'G10', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'T1', struct('A', 0, 'C', 0, 'E', 0));
+means_s = struct('G8', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'G10', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'T1', struct('A', 0, 'C', 0, 'E', 0));
 
 vert_position1 = [1,3,5];
 vert_position2 = [2,4,6];
@@ -74,7 +76,7 @@ for j=1:(length(dir_search)),
             delimiter = ',';
             startRow = 2;
 
-            formatSpec = '%f%f%f%f%f%f%f%f%f%q%q%q%q%q%q%q%[^\n\r]';
+            formatSpec = '%f%f%f%f%f%f%f%f%f%q%q%q%q%q%q%q%q%q%[^\n\r]';
 
             %% Open the text file.
             fileID = fopen(dir_search(j).name,'r');
@@ -100,9 +102,9 @@ for j=1:(length(dir_search)),
              ag1 = dataArray{:, 13};
              bg1 = dataArray{:, 14};
              cg1 = dataArray{:, 15};
-        %     C3 = dataArray{:, 14};
-        %     C4 = dataArray{:, 15};
-        %     CV2 = dataArray{:, 16};
+             means = dataArray{:, 16};
+             stdev = dataArray{:, 17};
+        %     CV2 = dataArray{:, 18};
         
             a = str2num(ag1{1});
             b = str2num(bg1{1});
@@ -118,6 +120,8 @@ for j=1:(length(dir_search)),
             gs_predict = (ss_vars.*mean(stdev))+mean(means);
             
             J_1.(d{1}).(d{2}) = interp1(J_vals,gs_predict,[1]);
+            means_s.(d{1}).(d{2}) = mean(means);
+            stdev_s.(d{1}).(d{2}) = mean(stdev);
             
             xlim([0 200]);
 %             ylim([0 3]);
@@ -142,7 +146,6 @@ fannames = {'G8', 'G10', 'T1'};
 
 fans = {g8_data, g10_data, t1_data};
 
-
 fannames = fieldnames(distance_sorted);
 
 plot_i = 0;
@@ -156,7 +159,10 @@ for fn=1:length(fannames)
     surface_wolmans = [];
     surface_d84s = [];
     J_values = [];
+    stdev_values = [];
+    means_values = [];
     J_labels = s_names;
+    
     for sn=1:length(s_names)
         surface = cf.(s_names{sn});
         bigval = nan(5e5,1);
@@ -176,13 +182,15 @@ for fn=1:length(fannames)
         d84s = zeros(1,len);
         errors = zeros(1,len);
         
-        
         J_values = [J_values; J_1.(fannames{fn}).(s_names{sn})];
+        stdev_values = [stdev_values; means_s.(fannames{fn}).(s_names{sn})];
+        means_values = [means_values; stdev_s.(fannames{fn}).(s_names{sn})];
     end
     
     subplot(3,2,vert_position2(fn));
-    plot(J_values, 'x-');
-    ylim([0, 35]);
+    j1 = plot(J_values, 'x-');
+       
+    ylim([0, 30]);
     end_v = length(s_names)+.5;
     xlim([.5, end_v]);
     set(gca,'xtick',1:length(s_names), 'xticklabel',s_names)
@@ -195,13 +203,16 @@ for fn=1:length(fannames)
 
     hold on;
     sd = plot(surface_d84s, 'kx-');
+    hold on;
+    std = plot(stdev_values, 'mo-');
+    
+    
     xlabel('Surfaces');
     ylabel('Grain size(mm)');
     set(gca,'xtick',1:length(s_names), 'xticklabel',s_names)
-    legend(sd, 'D84')
-    title([fannames{fn}, ' surface grain size variation'])
-    
-
+    legend([sd,std], {'D84', 'Stdev'}, 'Location', 'northwest');
+    title([fannames{fn}, ' surface grain size variation']);
+    ylim([0 200]);
 end
 
 print(f1, '-dpdf', ['pdfs/figure_8' '.pdf'])
