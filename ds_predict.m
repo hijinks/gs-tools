@@ -1,4 +1,4 @@
-% function [downstream_m,grain_ds,subs] = ds_predict(shp, ds, dist, width, params)
+function [downstream_m, grain_ds,subs, X, A, Depo] = ds_predict(dist, width, params)
     
     % 100 years
     u0 = params.uplift;
@@ -8,69 +8,52 @@
 
     input_qs = params.qs; % m3/yr
 
-    w = interp1(dist,width,1:lx);
-    
     w_min = floor(min(width));
     w_max = ceil(max(width));
+
+    ns = lx; % Basin
+
+    l_norm = dist/lx;
     
-    x_norm = dist/lx;
-    
-    ns = length(w); % Basin
-    dp = ns; % Basin depth
-    
-    w = linspace(w_min,w_max,ns);
-    coord_basin = linspace(0,1,ns);
+    subsidence_coords = linspace(0,1,7000);
+    basin_coords = linspace(0,1,lx);
+    lambda = 0.7;
     
     switch params.sub_profile
         case 'box'
-            subs = -uplift*ones(1,length(coord_basin));
+            subs = -uplift*ones(1,length(l_norm));
         case 'normal_expo'
             % Normal expo
-            alpha1 = 0.92420; % -ln(.5)/.75
-            alpha2 = 1.84839; % -ln(.5)/.375
-            subs = -uplift*exp(-alpha2*coord_basin);            
+            decay = 2.2; % -ln(.5)/.375
+            subs = -uplift*exp(-decay*subsidence_coords);            
     end
     
+    subs = subs(1:lx);
+       
+    X = interp1(dist,width,1:ns);
+    X = inpaint_nans(X, 4);
+    X(X<0) = 0;
+ 
+    A = abs(X.*-subs);
+    Qs_depo = cumtrapz(A);
+    Depo = trapz(A);
+    Qs_fine = params.qs-Qs_depo;
+    Qs_fine(Qs_fine<0) = 0;
     
-    min_sub = min(subs);
-    max_sub = max(subs);
+    R_star = lambda.*lx.*(A./Qs_fine);
 
-    dx = lx/ns;
-    dy = lx/ns;
-    dz = lx/dp;
-    
-    X = linspace(1,w_max,w_max);
-    Y = linspace(1,lx,ns);
-    Z1 = linspace(min_sub,max_sub,ns);
-
-    [X1,Y2] = meshgrid(X,Y);
-    Z = repmat(subs, 1, w_max)';
-
-    ds_vol = nan(length(w),1);
-    for j=1:length(w)
-        ds_vol(j) = (-subs(j))*(w(j))*dy;
-    end
-
-    Z = cumtrapz(ds_vol);
-
-    qs = input_qs*years   
-    
-    qsfine = qs-Z;
+    Y_star = abs(cumtrapz(cumtrapz(diff(basin_coords).*diff(R_star))));
 
     grainpdf0 = params.grainpdf; % initial grain size pdf log(D50)
-    phi0 = params.phi; % standard deviation of the sediment supply log(D84/D50)
+    phi0 = mean(params.phi); % standard deviation of the sediment supply log(D84/D50)
     C1 = params.C1;
-    Cv = params.Cv;
+    Cv = mean(params.Cv);
     C2 = params.C2;
     Cmult = C2/C1;
+    
+    grain_ds = grainpdf0+(phi0*Cmult)*(exp(-C1*Y_star)-1);
 
-    lambda = 0;
-    y = (1-lambda)*cumtrapz(Z./qsfine);
+    grain_ds = grain_ds*1000;
+    downstream_m = linspace(min(dist),max(dist),length(grain_ds));
 
-    grainpdf = grainpdf0+phi0*Cmult*(exp(-C1*y)-1);
-
-    grain_ds = 10.^grainpdf;
-
-    downstream_m = linspace(min(dist),max(dist),length(coord_basin));
-
-% end
+end
