@@ -1,14 +1,31 @@
 addpath('./scripts');
 addpath('./lib');
 
+X = 42.0;                  %# A3 paper size
+Y = 29.7;                  %# A3 paper size
+xMargin = 0;               %# left/right margins from page borders
+yMargin = 2;               %# bottom/top margins from page borders
+xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
+ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
+
+
+fig = figure;
+
+set(fig,'Visible','off');
+set(fig, 'PaperSize',[X Y]);
+set(fig, 'PaperPosition',[0 yMargin xSize ySize])
+set(fig, 'PaperUnits','centimeters');
+
 output_path = 'fan_comparisons/'
 % Prep fan data
-fan_names = {'G8', 'G10', 'T1', 'SR1'};
+% fan_names = {'G8', 'G10', 'T1', 'SR1'};
+fan_names = {'G8', 'G10', 'T1'};
 color_map = [[0 0.4980 0]; [0.8706 0.4902 0]; [0.8 0 0]; [0.2039 0.3020 0.4941]; [1 0 1]; [0 0 0]];
 line_styles = {'-','-k','-g','-r','-b','-c'};
 point_styles = {'xm','xk','xg','xr','xb','xc'};
 line_point_styles = {'x-','xk-','xg-','xr-','xb-','xc-'};
-fans = {g8_data, g10_data, t1_data, sr1_data};
+% fans = {g8_data, g10_data, t1_data, sr1_data};
+fans = {g8_data, g10_data, t1_data};
 
 % Normalised downstream fining for each surface
 
@@ -26,7 +43,7 @@ for fn=1:length(fannames)
     legend_labels = [];
     surface_wolmans = [];
     surface_d84s = [];
-    
+    subplot(2,2,fn);
     for sn=1:length(s_names)
         surface = cf.(s_names{sn});
         bigval = nan(5e5,1);
@@ -63,19 +80,17 @@ for fn=1:length(fannames)
     
 %     print(surface_figure, '-depsc', [output_path fannames{fn} '_downstream' '.eps'])
     
-    surface_averages_figure = figure;
-    
-    boxplot(surface_wolmans);
+%     surface_averages_figure = figure;
+    boxplot(surface_wolmans, 'DataLim', [0 200], 'ExtremeMode', 'clip', 'symbol', '','Labels', surface_names);
+
     hold on;
     sd = plot(surface_d84s, 'kx-');
     xlabel('Surfaces');
     ylabel('Grain size(mm)');
-    ylim([0,200]);
     set(gca,'xtick',1:length(s_names), 'xticklabel',s_names)
     legend(sd, 'D84')
     title([fannames{fn}, ' surface grain size variation'])
     
-     print(surface_averages_figure, '-dpdf', [output_path fannames{fn} '_surface_averages' '.pdf'])
     
 %     cfreq_figure = figure;
 %     
@@ -109,7 +124,10 @@ for fn=1:length(fannames)
 %     legend([last_pink, last_black], {'Holocene', 'Late Pleistocene'}, 'Location', 'SE')
 %     print(cfreq_figure, '-depsc', [output_path fannames{fn} '_cfreq' '.eps'])
 end
-    
+
+print(fig, '-dpdf', ['surface_averages' '.pdf'])
+
+
 % Surface averages
 
 % Cumulative frequency

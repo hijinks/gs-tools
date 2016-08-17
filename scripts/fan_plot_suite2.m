@@ -1,14 +1,29 @@
 addpath('./scripts');
 addpath('./lib');
 
-output_path = 'fan_comparisons/'
-% Prep fan data
+X = 42.0;                  %# A3 paper size
+Y = 29.7;                  %# A3 paper size
+xMargin = 0;               %# left/right margins from page borders
+yMargin = 2;               %# bottom/top margins from page borders
+xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
+ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
+f = figure('Menubar','none');
+set(f, 'Position', [0,0, 1200, 800])
+set(f, 'PaperSize',[X Y]);
+set(f, 'PaperPosition',[0 yMargin xSize ySize])
+set(f, 'PaperUnits','centimeters');
+set(f, 'Visible', 'off');
+
+surface_colours;
+[apex_data] = fan_apexes;
+
+output_path = 'dump/comparisons/'
+% Downstream fining plots
 fan_names = {'G8', 'G10', 'T1', 'SR1'};
-color_map = [[1.0000    0.6000    0.6000]; [0.8000    0.8000    1.0000]; [ 0.6000    0.6000    1.0000]; [0.2039 0.3020 0.4941]; [0.8196    0.8196    0.8510]; [0 0 0]];
 line_styles = {'-','-k','-g','-r','-b','-c'};
 point_styles = {'xm','xk','xg','xr','xb','xc'};
 line_point_styles = {'x-','xk-','xg-','xr-','xb-','xc-'};
-fans = {g8_data, g10_data, t1_data, 'sr1_data'};
+fans = {g8_data, g10_data, t1_data, sr1_data};
 
 % Normalised downstream fining for each surface
 
@@ -26,7 +41,9 @@ for fn=1:length(fannames)
     legend_labels = {};
     surface_wolmans = [];
     surface_d84s = [];
-    surface_figure = figure()
+%     surface_figure = figure()
+    
+    subplot(2,2, fn)
     
     for sn=1:length(s_names)
         
@@ -45,8 +62,13 @@ for fn=1:length(fannames)
                 surface_wolmans = [surface_wolmans,surface_wolman];
                 len = length(surface(:,1));
                 distances = cell2mat(surface(:,1));
+                sites = cell2mat(surface(:,3));
+                
+                [apex_distance, relative_distances] = fan_apex_relative(sites, ...
+                    apex_data.(fan_name), origins.(fan_name)); 
+                
                 max_dist = max(distances);
-                norm_dist = distances./max_dist;
+                norm_dist = distances;
                 wolmans = cell2mat(surface(:,2)');
                 d84s = zeros(1,len);
                 errors = zeros(1,len);
@@ -54,11 +76,13 @@ for fn=1:length(fannames)
                     d84s(1,j) = prctile(wolmans(:,j), 84);
                     errors = (prctile(wolmans(:,j), 90)-prctile(wolmans(:,j), 80))/2;
                 end
-                d = boundedline(norm_dist, d84s, errors, '-x', 'alpha', 'cmap', color_map(sn,:))
+                d = boundedline(norm_dist, d84s, errors, '-x', 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
                 ylim([0,150]);
-                xlim([0,1.1]);
+%                 xlim([0,1.1]);
                 xlabel('Normalised downstream distance');
                 ylabel('Grain size (mm)');
+                hold on;
+                plot([apex_distance,apex_distance], [-10,200], 'k-');
                 hold on;
                 legend_labels = [legend_labels surface_names{sn}];
                 legend_items = [legend_items,d];
@@ -66,9 +90,10 @@ for fn=1:length(fannames)
         end
     end
     legend(legend_items,char(legend_labels));
-    title(['Downstream Fining ' fannames{fn}]);
+    title(fannames{fn});
     set(gca, 'FontSize', 14)
-    print(surface_figure, '-dpng', [output_path fannames{fn} '_downstream' '.png'])
+
+print(f, '-dpng', ['fans_downstream', '.png'])
     
 %     surface_averages_figure = figure;
 %     

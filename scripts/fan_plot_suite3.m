@@ -1,8 +1,8 @@
 addpath('./scripts');
 addpath('./lib');
 
-output_path = 'fan_comparisons/'
-% Prep fan data
+output_path = 'dump/';
+% Self similarity plots
 fan_names = {'G8', 'G10', 'T1', 'SR1'};
 color_map = [[1.0000    0.6000    0.6000]; [0.8000    0.8000    1.0000]; [ 0.6000    0.6000    1.0000]; [0.2039 0.3020 0.4941]; [0.8196    0.8196    0.8510]; [0 0 0]];
 line_styles = {'-','-k','-g','-r','-b','-c'};
@@ -16,7 +16,26 @@ fans = {g8_data, g10_data, t1_data, sr1_data};
 
 fannames = fieldnames(distance_sorted);
 
+sfig = figure;
+X = 42.0;                  %# A3 paper size
+Y = 29.7;                  %# A3 paper size
+xMargin = 0;               %# left/right margins from page borders
+yMargin = 2;               %# bottom/top margins from page borders
+xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
+ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
+    
+set(sfig, 'Position', [0,0, 1200, 800])
+set(sfig, 'PaperSize',[X Y]);
+set(sfig, 'PaperPosition',[0 yMargin xSize ySize])
+set(sfig, 'PaperUnits','centimeters');
+        
+
+ha = tight_subplot(2,2,[.02;.02],.05,[.05 .02]);
+
 for fn=1:length(fannames)
+    
+    axes(ha(fn));
+    
     fan_data = fans{fn};
 %     surface_figure = figure;
     cf = distance_sorted.(fannames{fn});
@@ -26,7 +45,7 @@ for fn=1:length(fannames)
     legend_labels = {};
     surface_wolmans = [];
     surface_d84s = [];
-    surface_figure = figure()
+%     surface_figure = figure()
     
     for sn=1:length(s_names)
         surface_data = fan_data{sn};
@@ -39,74 +58,31 @@ for fn=1:length(fannames)
 
         for k=1:length(ss)
            [N,edges] = histcounts(ss{k}, ed);
-           plot(xp,N, 'Color' , [.7 .7 .7]);
+           fD = N./sum(N);
+           plot(xp,fD, 'Color' , [.7 .7 .7]);
            meta = surface_data.meta{k};
            hold on;
            if max(N) > 70
                disp([s_names{sn} meta.name meta.site]);
            end
            all_x = [all_x; xp];
-           all_y = [all_y; N];
+           
+           
+           all_y = [all_y; fD];
            
         end
 
         plot(all_x,all_y, 'x');
-        set(gca, 'FontSize',14);
-        hold on;
         
     end
-    title(['Self Similiarity Curves ' fannames{fn}]);
-    set(gca, 'FontSize', 14)
-    ylim([0,70])
-%     print(surface_figure, '-dpdf', [output_path fannames{fn} '_self_similarity' '.pdf'])
-    
-%     surface_averages_figure = figure;
-%     
-%     boxplot(surface_wolmans);
-%     hold on;
-%     sd = plot(surface_d84s, 'kx-');
-%     xlabel('Surfaces');
-%     ylabel('Grain size(mm)');
-%     ylim([0,200]);
-%     set(gca,'xtick',1:length(s_names), 'xticklabel',s_names)
-%     legend(sd, 'D84')
-%     title([fannames{fn}, ' surface grain size variation'])
-%     
-%      print(surface_averages_figure, '-dpdf', [output_path fannames{fn} '_surface_averages' '.pdf'])
-%     
-%     cfreq_figure = figure;
-%     
-%     for sn=1:length(s_names)
-%         surface = cf.(s_names{sn});
-%         
-%         if (strcmp(s_names{sn}, 'B')+(strcmp(s_names{sn}, 'A'))) < 1
-%            color = 'm';
-%            t = 1;
-%         else
-%            color = 'k';
-%            t = 0;
-%         end
-%         len = length(surface(:,1));
-%         
-%         for k=1:len
-%             h = cdfplot(surface{k,2}); 
-%             set(h,'Color',color)
-%             hold on;
-%             if t
-%                last_pink = h;
-%             else
-%                last_black = h; 
-%             end
-%         end
-%         set(h.Parent, 'xlim', [0 250])
-% 
-%     end
-%     title([fannames{fn}, ' Grain Size Distributions'])
-%     xlabel('Long axis grain size (mm)')
-%     legend([last_pink, last_black], {'Holocene', 'Late Pleistocene'}, 'Location', 'SE')
-%     print(cfreq_figure, '-depsc', [output_path fannames{fn} '_cfreq' '.eps'])
-end
-    
-% Surface averages
+    textLoc(fannames{fn}, 'northeast');
+    ylim([0,.6])
 
-% Cumulative frequency
+end
+
+set(ha(1:2),'XTickLabel',''); set(ha(2),'YTickLabel',''); set(ha(4),'YTickLabel','')
+h = supertitle('Self-Similarity Curves');
+P = get(h,'Position');
+set(h,'Position',[P(1) P(2)+0.03 P(3)]);
+print(sfig, '-dpdf', [output_path '2015_self_similarity' '.pdf'])
+

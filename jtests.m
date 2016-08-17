@@ -2,8 +2,6 @@ addpath('./scripts');
 addpath('./lib');
 
 fans = fieldnames(distance_sorted);
-ds_surface = distance_sorted.SR1.D;
-surface_data = sr1_data{4};
 
 fan_data = {g8_data, g10_data, t1_data, sr1_data};
 

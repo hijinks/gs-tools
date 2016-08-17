@@ -32,7 +32,7 @@ function plot_surface(d_sorted)
         hold on;
         plot(x_data,yfit2, 'k-', 'LineWidth', 1)
         
-        lm = fitlm(x_data,d50s,'linear')
+        lm = fitlm(x_data,d50s,'linear');
         c = lm.Coefficients.Estimate(1);
         mx = lm.Coefficients.Estimate(2);
         mx2 = 0;
