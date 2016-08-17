@@ -10,12 +10,11 @@ xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
 ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
 
 
-fig = figure;
 
-set(fig,'Visible','off');
-set(fig, 'PaperSize',[X Y]);
-set(fig, 'PaperPosition',[0 yMargin xSize ySize])
-set(fig, 'PaperUnits','centimeters');
+% set(fig,'Visible','off');
+% set(fig, 'PaperSize',[X Y]);
+% set(fig, 'PaperPosition',[0 yMargin xSize ySize])
+% set(fig, 'PaperUnits','centimeters');
 
 surfaces = [];
 
@@ -25,9 +24,6 @@ surface_colours;
 
 padding = {};
 
-if any(strcmp('B',fieldnames(distance_sorted.SR1)))
-	distance_sorted.SR1 = rmfield(distance_sorted.SR1,'B');
-end
 
 fan_surface_medians = struct();
 fan_surface_means = struct();
@@ -86,6 +82,8 @@ sl = fieldnames(slope_data);
 
 fan_surface_slopes = struct();
 for w=1:length(sl)
+    figure;
+    
    surface_labels = fieldnames(slope_data.(sl{w}));
    surface_slopes = struct();
    for k=1:length(surface_labels)
@@ -94,18 +92,18 @@ for w=1:length(sl)
    fan_surface_slopes.(sl{w}) = surface_slopes;
 end
 
-
+% 
 % Plotting
 
 fan_names = fieldnames(fan_surface_means);
 
 
 rho_w = 1000; % kg/m3 water
-rho_g = 1680 % kg/m3 gravel
+rho_g = 1680; % kg/m3 gravel
 
 h = .3; % m
-width = 10;
-perimeter = 2*h*width;
+width = 5;
+perimeter = (2*h)+width;
 areas = width*h;
 radius = areas/perimeter;
 g = 9.8;
@@ -115,11 +113,15 @@ g = 9.8;
 for f=1:length(fan_names)
     fan_name = fan_names{f};
     surface_names = fieldnames(fan_surface_means.(fan_name));
+    fig = figure;
+    legend_items = {};
+    legend_labels = {};
+    stdevs = {};
     
     for v=1:length(surface_names)
        surface_name = surface_names{v};
        colour = clrs.(fan_name).(surface_name);
-       
+       marker = markers.(fan_name).(surface_name);
        s_distance = fan_surface_distances.(fan_name).(surface_name);
        s_sites = fan_surface_site_locations.(fan_name).(surface_name);
        
@@ -134,26 +136,34 @@ for f=1:length(fan_names)
        gen_c = sin(s_slope) * rho_w * g * radius; % General fluid mobility
        tau_c = gen_c ./ (rho_g - rho_w) * g .* (s_medians/1000); % Critical shear
        
-%        f = fit(relative_distances, tau_c,'poly1');
-%        fy = f.p1.*relative_distances.^2 + f.p2.*relative_distances + f.p3;
-%        fy = f.p1.*relative_distances + f.p2;
+       tau_mean = mean(tau_c);
+       
+       stdevs = [stdevs, ['\bf' surface_name '\rm ', num2str(sprintf('%0.2f', std(tau_c)))]];
+       lx = length(relative_distances);
 
-       plot(relative_distances, tau_c, 'x', 'Color', colour);
+       px = plot(relative_distances, tau_c, marker, 'Color', colour);
        hold on;
-%        plot(relative_distances, fy, '-', 'Color', colour);
-%        hold on;
-       plot([0,0], [0,1], 'k-');
+       pl = plot(relative_distances, ones(lx,1)*tau_mean, '--', 'Color', colour);
+       legend_items = [legend_items; px; pl];
+       legend_labels = [legend_labels; surface_name; [surface_name ' (mean)']];
+       hold on;
+       plot([0,0], [0,.6], 'k-');
        hold on;
        xlabel('Relative distance from fan apex (m)');
        ylabel('\tau^*');
        set(gca, 'FontSize', 14);
-       title('Critical shear stress downstream of fan surfaces')
+       
+       title(['Critical shear stress downstream of fan surfaces ' fan_name])
        
     end
-end
-params = {['\bf{\rho}_w \rm', num2str(rho_w)],['\bf{\rho}_s \rm', num2str(rho_g)],['\bf{h} \rm', num2str(h)], ...
+    legend(legend_items, legend_labels)
+    params = {['\bf{\rho}_w \rm', num2str(rho_w)],['\bf{\rho}_s \rm', num2str(rho_g)],['\bf{h} \rm', num2str(h)], ...
      ['\bf{width} \rm', num2str(width)],['\bf{radius} \rm', num2str(radius)], ['\bf{g} \rm', num2str(g)]};
-textLoc(params, 'northwest')
+    textLoc(params, 'northwest');
+    stdevs = [['\bf StDev \rm'], stdevs];
+    textLoc(stdevs, 'southeast');
+end
+
 
 % gscatter(fan_surface_slopes,tau_c,mean_gs_ages,'br','xo')
 % labelpoints(fan_surface_slopes,tau_c, mean_gs_labels);
@@ -161,4 +171,4 @@ textLoc(params, 'northwest')
 % ylabel('Mean grain size (mm)');
 % title('Fan surface average grain size vs. average slope');
 
-print(fig, '-dpdf', ['dump/comparisons/critical_shear' '.pdf'])
+% print(fig, '-dpdf', ['critical_shear' '.pdf'])

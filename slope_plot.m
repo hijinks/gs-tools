@@ -68,9 +68,9 @@ for fn=1:length(fannames)
        
        surf_colour = clrs.(fannames{fn}).(s_names{sn});
        sl = plot(dist_all,zy, 'Color' , surf_colour);
-%        hold on
-%        plot(dist_sort,z_sort);
-%        plot(dist_sort, z_sort, 'o');
+       hold on
+       plot(dist_sort,z_sort);
+       plot(dist_sort, z_sort, 'o');
        
         legend_items = [legend_items;sl];
         legend_labels = [legend_labels;s_names{sn}];
