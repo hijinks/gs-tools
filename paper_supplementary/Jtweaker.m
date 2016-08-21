@@ -145,8 +145,8 @@ function [ss_var, fraction, fit_x, fit_y,...
     field_x =xp(1:end-1);
     fit_x = [];
     fit_y = [];
-    CV = mean(surface_data.cv_norm);
-
+    %CV = mean(surface_data.cv_norm);
+    CV = .7
     % Duller et al. 2010 values
     % CV = 1.11;
     C1_av = .7;
