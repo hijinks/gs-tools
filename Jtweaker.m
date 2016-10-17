@@ -22,7 +22,7 @@ function varargout = Jtweaker(varargin)
 
 % Edit the above text to modify the response to help Jtweaker
 
-% Last Modified by GUIDE v2.5 13-Jul-2016 11:57:28
+% Last Modified by GUIDE v2.5 20-Jul-2016 10:38:00
 % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
@@ -120,7 +120,9 @@ function [ss_var, fraction, fit_x, fit_y,...
     ds_norm = ds_dist./max(ds_dist);
 
     ss = surface_data.ss;
-
+    C1_mean = surface_data.C1;
+    C2_mean = surface_data.C2;
+    
     ed = -5.5:.5:5.5;
     xp = [-5:.5:5.5];
     all_x = [];
@@ -145,31 +147,35 @@ function [ss_var, fraction, fit_x, fit_y,...
     field_x =xp(1:end-1);
     fit_x = [];
     fit_y = [];
-    CV = mean(surface_data.cv_norm);
-
+     CV = mean(surface_data.cv_norm);
+%      CV = .7
     % Duller et al. 2010 values
     % CV = 1.11;
-    C1_av = .7;
-    % C2_av = .5;
-    C2_av = C1_av/CV;
+     C1_av = .7;
+%      C2_av = 1;
+      C2_av = C1_av/CV;
     % 
     % C1_av = .7;
     % C2_av = .88;
     % CV = .8;
-
+%     C1_av = C1_mean;
+%     C2_av = C2_mean;
+    
     ss_var = -5:.5:6;
     
     function fraction = fractionOnly(j_params, ss_data)
         [J, Jprime, phi, sym, expsym, intsysmeps, sigma, int_val, int_constant_ana, fraction] = calcFraction(j_params, ss_data, C1_av, C2_av);
-	end
-    
-    if FIT > 0
-        [v,resnorm,residuals] = lsqcurvefit(@fractionOnly,[ag,bg,cg], field_x, ...
+    end
+
+    if FIT > 0 
+        [v,resnorm,residuals,exitflag,output,lambda,jacobian] = lsqcurvefit(@fractionOnly,[ag,bg,cg], field_x, ...
             field_y', [1e-4,1e-4,1e-4]);
         
         ag = v(1);
         bg = v(2);
         cg = v(3);
+        
+        conf = nlparci(v,residuals,'jacobian',jacobian);
         
         set(handles.a_val_slider,'Value', ag)
         set(handles.bg_val_slider,'Value', bg)
@@ -179,8 +185,13 @@ function [ss_var, fraction, fit_x, fit_y,...
         set(handles.cg_output,'String', cg) 
         
     else
-       residuals = [];
-       resnorm = [];
+        f = fittype('a*exp(-b*x)+c');
+        [fit1,gof,fitinfo] = fit(field_x', field_y',f,'StartPoint',[ag,bg,cg]);
+        conf = confint(fit1,0.95);
+        residuals = fitinfo.residuals;
+        jacobian = fitinfo.Jacobian;
+        resnorm = gof.rsquare;
+        conf = nlparci([ag;bg;cg],residuals,'jacobian',jacobian);
     end
     
     [J, Jprime, phi, sym, expsym, intsysmeps, sigma, int_val, ...
@@ -204,7 +215,14 @@ function [ss_var, fraction, fit_x, fit_y,...
     saveData.cg = cg;
     saveData.mean = s_mean;
     saveData.stdev = s_stdev;
-    
+    saveData.field_x = field_x';
+    saveData.field_y = field_y';
+    saveData.C1 = C1_av;
+    saveData.C2 = C2_av;
+    saveData.CV = CV;
+    saveData.upper = conf(:,1);
+    saveData.lower = conf(:,2);
+        
     set(handles.c1_output, 'String', C1_av);
     set(handles.c2_output, 'String', C2_av);
     set(handles.cv_output, 'String', CV);
@@ -280,12 +298,13 @@ function Jtweaker_SaveCharts(handles)
     yMargin = 2;               %# bottom/top margins from page borders
     xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
     ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
-    f = figure('Menubar','none');
+%     f = figure('Menubar','none');
+    f = figure();
     set(f, 'Position', [0,0, 1200, 800])
     set(f, 'PaperSize',[X Y]);
     set(f, 'PaperPosition',[0 yMargin xSize ySize])
     set(f, 'PaperUnits','centimeters');
-	set(f, 'Visible', 'off');
+% 	set(f, 'Visible', 'off');
     
     axes('Position',[.1 .53 .8 .4])
     p1 = plot(handles.ss,handles.fraction);
@@ -433,8 +452,15 @@ function a_val_slider_Callback(hObject, eventdata, handles)
 
   val = get(hObject,'Value');
   set(handles.ag_output,'String', num2str(val))
-  Jtweaker_ProcessJValues(handles);
-end
+  new_ag = get(handles.a_val_slider, 'Value');
+  new_bg = get(handles.bg_val_slider, 'Value');
+  new_cg = get(handles.cg_val_slider, 'Value');
+    
+  [ss, fraction, field_x, field_y,...
+      fit_x, fit_y, saveData] = Jtweaker_Process(handles, handles.ds_surface, ...
+      handles.surface_data, new_ag, new_bg, new_cg, 0);
+    
+  Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);end
 
 % --- Executes during object creation, after setting all properties.
 function a_val_slider_CreateFcn(hObject, eventdata, handles)
@@ -456,7 +482,15 @@ function bg_val_slider_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
     val = get(hObject,'Value');
     set(handles.bg_output,'string', num2str(val))
-    Jtweaker_ProcessJValues(handles);
+  new_ag = get(handles.a_val_slider, 'Value');
+  new_bg = get(handles.bg_val_slider, 'Value');
+  new_cg = get(handles.cg_val_slider, 'Value');
+    
+  [ss, fraction, field_x, field_y,...
+      fit_x, fit_y, saveData] = Jtweaker_Process(handles, handles.ds_surface, ...
+      handles.surface_data, new_ag, new_bg, new_cg, 0);
+    
+  Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -480,7 +514,16 @@ function cg_val_slider_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
   val = get(hObject,'Value');
   set(handles.cg_output,'string', num2str(val))
-  Jtweaker_ProcessJValues(handles);
+
+  new_ag = get(handles.a_val_slider, 'Value');
+  new_bg = get(handles.bg_val_slider, 'Value');
+  new_cg = get(handles.cg_val_slider, 'Value');
+    
+  [ss, fraction, field_x, field_y,...
+      fit_x, fit_y, saveData] = Jtweaker_Process(handles, handles.ds_surface, ...
+      handles.surface_data, new_ag, new_bg, new_cg, 0);
+    
+  Jtweaker_UpdateSystem(handles, ss, fraction, field_x, field_y, fit_x, fit_y, saveData);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -639,16 +682,17 @@ function save_data_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to save_data_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    [file,path]  = uiputfile('*.csv', 'Save Data', handles.surface_name);
+%    [file,path]  = uiputfile('*.csv', 'Save Data', handles.surface_name);
+     path = 'data/jfits_auto/'
+     file = [handles.surface_name,'.csv'];
     saveData = handles.saveData;
-    disp(handles)
     a = get(handles.ag_output,'String');
     b = get(handles.bg_output,'String');
     c = get(handles.cg_output,'String');
     c1 = get(handles.c1_output,'String');
     c2 = get(handles.c2_output,'String');
     cV = get(handles.cv_output,'String');
-
+    disp(saveData)
     saveData.ag        = a;
     saveData.bg        = b;
     saveData.cg        = c;

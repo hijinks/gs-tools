@@ -17,7 +17,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             paths = [paths;pathstr];
             filenames = [filenames;name];
             exts = [exts;ext];
-            C = strsplit(pathstr,'/');
+            C = strsplit(pathstr,filesep);
             for l=3:(length(C))
                 n = l-2;
                 if length(sub_dirs) < n
@@ -47,7 +47,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
     f_vals(1:y, col_l) = exts;
     col_names{col_l} = 'Extension';
     T = cell2table(f_vals,'VariableNames',col_names);
-
+    disp(T)
     f_data = T(find(strcmp(fan,T.Dir_1)), :);
     surfaces = unique(f_data.Dir_2);
 
