@@ -1,5 +1,5 @@
-Y = 29.7;                  %# A3 paper size
-X = 21.0;                  %# A3 paper size
+Y = 20;                  %# A3 paper size
+X = 14.0;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
 yMargin = 1;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
@@ -8,6 +8,7 @@ ySize = Y - 2*yMargin;     %# figure size on paper (widht & hieght)
 csv_dir = ['.' filesep 'data' filesep 'jfits'];
 
 dir_search = subdir(csv_dir);
+meta;
 
 surfaces = [];
 ag = nan(length(dir_search),1);
@@ -112,7 +113,7 @@ for j=1:(length(dir_search)),
             m_mean = mean(means);
             gs_predict = (ss_vars.*mean(stdev))+mean(means);
             
-            xlim([0 200]);
+            xlim([0 150]);
 %             ylim([0 3]);
             ss_cumul = [ss_cumul; ss_vars'];
             gs_cumul = [gs_cumul; gs_predict'];
@@ -121,8 +122,12 @@ for j=1:(length(dir_search)),
             fit_fraction = [fit_fraction,fraction1];
             fit_ss = [fit_ss, ss_var1];
             axes(ha(spp(1)));
-            p1 = plot(ss_vars, J_vals, '-', 'Color', clrs.(d{1}).(d{2}) );
-            xlim([-2 5]);
+            if strcmp(ages.(d{1}).(d{2}), 'Pleistocene') > 0
+                p1 = plot(ss_vars, J_vals, '-', 'Color', [0 0 0], 'LineWidth', 1.5);
+            else
+                p1 = plot(ss_vars, J_vals, '-', 'Color', [0.6 0.6 0.6], 'LineWidth', 1.5);
+            end
+            xlim([-2 4]);
             ylim([0 3]);
             hold on;
             ss_vars(isinf(ss_vars)) = [];
@@ -130,12 +135,18 @@ for j=1:(length(dir_search)),
             plot(ss_padding, ones(1, length(ss_padding))*min(J_vals), ':', 'Color', [.7,.7,.7]);
             hold on;
             axes(ha(spp(2)));
-            p2 = plot(gs_predict, J_vals, '-', 'Color', clrs.(d{1}).(d{2}) );
+            
+            if strcmp(ages.(d{1}).(d{2}), 'Pleistocene') > 0
+                p2 = plot(gs_predict, J_vals, '-', 'Color', [0 0 0], 'LineWidth', 1.5);
+            else
+                p2 = plot(gs_predict, J_vals, '-', 'Color', [0.6 0.6 0.6], 'LineWidth', 1.5);
+            end
+            
             ylim([0 3]);
             hold on;
             gs_predict(isinf(gs_predict)) = [];
             ss_padding = [max(gs_predict),300]
-            plot(ss_padding, ones(1, length(ss_padding))*min(J_vals), ':', 'Color', [.7,.7,.7]);
+            plot(ss_padding, ones(1, length(ss_padding))*min(J_vals), ':', 'Color', [.7,.7,.7], 'LineWidth', 1.5);
             hold on;
             ylim([0 3]);
         end

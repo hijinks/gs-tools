@@ -1,43 +1,40 @@
-function [upper, lower] = ss_range(upper_bounds, lower_bounds, mean, stdev)
+function [ss_vals] = ss_range(a_vals, b_vals)
     
-    ss_outputs = zeros(8,1000);
-    a_vals = [upper_bounds(1),lower_bounds(1)];
-    b_vals = [upper_bounds(2),lower_bounds(2)];
-    c_vals = [upper_bounds(3),lower_bounds(3)];
+    ss_outputs = [];
+    c = 0.1;
+    S1 = [];
+    ss_vals = struct();
     
-    figure;
+    % Substrate
+    j_substrate = zeros(length(a_vals),1);
     
-    d = 0;
-    for i=1:2
-        % a values
+    % Equal
+    j1 = zeros(length(a_vals),1);
+    
+    % Transport
+    j_transport = zeros(length(a_vals),1);
+    
+    for i=1:length(a_vals)
         a = a_vals(i);
-        
-        for j=1:2
-            % b values
-            b = b_vals(j);
-            
-            for k=1:2
-                % c values
-                c = c_vals(k);
-                
-                d = d+1;
-                J_vals = c:.005:3;
-                ss_outputs(d,1:numel(J_vals)) = -log((J_vals-c)/a)/b;
-                ss_test = -log((J_vals-c)/a)/b;
-                gs_predict = (ss_test.*stdev+mean);
-                plot(gs_predict, J_vals);
-                hold on;
-                
-                xp = [-10:.5:10.5];
-                
-                [N,edges] = histcounts(ss_test, xp);
-                fD = N./sum(N);
-                field_x =xp(1:end-1);   
-                ss_outputs = ss_outputs(find(ss_outputs,1,'first'):find(ss_outputs,1,'last'));
-            end
-        end
+        b = b_vals(i);
+    
+        J_vals = c:.005:3;
+        j1(i) = -log((1-c)/a)/b;
+        j_substrate(i) = -log((.5-c)/a)/b;
+        j_transport(i) = -log((1.5-c)/a)/b;
     end
     
-    upper = max(ss_outputs);
-    lower = min(ss_outputs);
+    
+    upper_J1 = max(j1);
+    lower_J1 = min(j1);
+    
+    upper_Jsubstrate = max(j_substrate);
+    lower_Jsubstrate = min(j_substrate);
+
+    upper_Jtransport = max(j_transport);
+    lower_Jtransport = min(j_transport);
+    
+    ss_vals.J1 = [upper_J1, lower_J1];
+    ss_vals.Jtransport = [upper_Jtransport,lower_Jtransport];
+    ss_vals.Jsubstrate = [upper_Jsubstrate, lower_Jsubstrate];
 end

@@ -35,6 +35,7 @@ for fn=1:length(fannames)
     
 %     surface_figure = figure;
     cf = distance_sorted.(fannames{fn});
+    fan_name = fannames{fn};
     s_names = fieldnames(cf);
     surface_names = s_names;
     legend_items = [];

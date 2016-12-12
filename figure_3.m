@@ -16,23 +16,37 @@ set(f, 'PaperPosition',[0 yMargin xSize ySize])
 set(f, 'PaperUnits','centimeters');
 
 meta;
+bigval = nan(5e5,1);
 
 for fn=1:length(fannames)
     cf = distance_sorted.(fannames{fn});
     fan_data = fans{fn};
     s_names = fieldnames(cf);
-    subplot(2,2,fn);
+    subplot(2,3,fn);
+    surface_wolmans = [];
+    surface_d84s = [];
+    
     for sn=1:length(s_names)
 
-        h = title([fannames{fn} ' - Surface ' s_names{sn}]) 
+        h = title([fannames{fn} ' - Surface ' s_names{sn}]);
         surface_data = fan_data{sn};
         surface = cf.(s_names{sn});
+        
+        surface_d84s = [surface_d84s,prctile(cell2mat(surface(:,2)), 84)];
+        
+        surface_wolman = cell2mat(surface(:,2));
+        surface_wolman(isnan(surface_wolman)) = [];
+        dif = length(bigval) - length(surface_wolman);
+        pad = nan(dif,1);
+        surface_wolman = [surface_wolman;pad];
+        surface_wolmans = [surface_wolmans,surface_wolman];
+        
         age = ages.(fannames{fn}).(s_names{sn});
         if (strcmp(age, 'Pleistocene')) < 1
            color = warm_colours(20, :);
            t = 0;
         else
-           color = cold_colours(20, :);
+           color = cold_colours(30, :);
            t = 1;
         end
         len = length(surface(:,1));
@@ -46,16 +60,33 @@ for fn=1:length(fannames)
                last_holocene = h; 
             end
         end
-        set(h.Parent, 'xlim', [0 250])
+        set(h.Parent, 'xlim', [0 250]);
+        set(gca,'FontSize', 12);
     end
     title(fannames{fn});
     xlabel('Grain size');
     d84_line = plot([0,300], [.84,.84], 'k--');
     d50_line = plot([0,300], [.5, .5], 'b:');
-    legend([last_holocene, last_pleistocene, d84_line, d50_line], {'Holocene', 'Pleistocene', 'D84', 'D50'}, 'Location', 'southeast');
+    
+    subplot(2,3,fn+3);
+
+    boxplot(surface_wolmans, 'DataLim', [0 201], 'ExtremeMode', 'clip', 'symbol', '','Labels', s_names);
+    hold on;
+    sd = plot(surface_d84s, 'kx-');
+    xlabel('Surfaces');
+    ylabel('Grain size (mm)');
+    ylim([-5 200]);
+    set(gca,'xtick',1:length(s_names), 'xticklabel',s_names)
+    legend(sd, 'D84')
+    title(fannames{fn});
+    set(gca,'FontSize', 12);
 end
-subplot(2,2,4);
-plot([] , []);
-textLoc('Comparison of Wolman vs. Photogrammetry', 'center');
+% subplot(1,3,3);
+% plot([] , []);
+% textLoc('Comparison of Wolman vs. Photogrammetry', 'center');
+
+legend([last_holocene, last_pleistocene, d84_line, d50_line], {'Holocene', 'Late-Pleistocene', 'D84', 'D50'}, 'Location', 'southeast');
+set(gca,'FontSize', 12);
+
 print(f, '-dpdf', ['pdfs/' 'figure_3.pdf'])
 print(f, '-depsc', ['pdfs/figure_3' '.eps'])

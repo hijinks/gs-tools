@@ -78,37 +78,51 @@ for fn=1:length(fannames)
         
         subplot(3,2, plot_ds);
         
-         d = boundedline(relative_distances, d84s, errors, '-x', 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
+        d = plot(relative_distances, d84s, ['-' symbols.(fannames{fn}).(s_names{sn})], 'Color', clrs.(fannames{fn}).(s_names{sn}));
+        %d = boundedline(relative_distances, d84s, errors, ['-' symbols.(fannames{fn}).(s_names{sn})], 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
         ylim([0,150]);
-%                 xlim([0,1.1]);
+        
+        if strcmp(fan_name, 'G10') > 0
+            xlim([-1000,1500]);
+        else
+            xlim([-1000,2500]);
+        end
+        
         xlabel('Downstream distance (m)');
         ylabel('Grain size (mm)');
-        set(gca, 'FontSize', 7)
+        set(gca, 'FontSize', 12)
         hold on;
         legend_labels = [legend_labels surface_names{sn}];
         legend_items = [legend_items,d];
         subplot(3,2, plot_ss);
-        ss = plot(relative_distances, cv,  'x', 'Color', clrs.(fannames{fn}).(s_names{sn}));
-        set(gca, 'FontSize', 7)
+        ss = plot(relative_distances, cv,  symbols.(fannames{fn}).(s_names{sn}), 'Color', clrs.(fannames{fn}).(s_names{sn}));
+        set(gca, 'FontSize', 12)
         hold on;
     end
     subplot(3,2, plot_ds);
-    text(0+30, 30, '← Fan apex');
-    textLoc('Bounds: D80-D90', 'southeast');
+    text(0+30, 30, '- Fan apex');
+    %textLoc('Bounds: D80-D90', 'southeast');
     legend(legend_items,char(legend_labels));
-    title(['Fan ', fannames{fn}, ' - D84']);
-    plot([0,0], [-10,200], 'k-');
+    textLoc(['\bf', fannames{fn}, ' - D84'], 'northwest', 'FontSize', 12);
+    plot([0,0], [-10,200], 'k--');
     subplot(3,2, plot_ss);
-    ylim([0,1.2])
-    plot([0,0], [-1,3], 'k-');
-    text(0+30, .2, '← Fan apex');
-    set(gca, 'FontSize', 7)
+    ylim([0,1.2]);
+    
+    if strcmp(fan_name, 'G10') > 0
+        xlim([-1000,1500]);
+    else
+        xlim([-1000,2500]);
+    end
+        
+    plot([0,0], [-1,3], 'k--');
+    text(0+30, .2, '- Fan apex');
+    set(gca, 'FontSize', 12)
     hold on;
-    legend(legend_labels, 'Location', 'southeast');
-    title(['Fan ', fannames{fn}, ' - CV']);
+    %legend(legend_labels, 'Location', 'southeast');
+    textLoc(['\bf', fannames{fn}, ' - CV'], 'northwest', 'FontSize', 12);
     xlabel('Downstream distance (m)');
     ylabel('Cv');    
-    set(gca, 'FontSize', 7)
+    set(gca, 'FontSize', 12)
 end
 
 print(f, '-dpdf', ['pdfs/figure_4' '.pdf'])
