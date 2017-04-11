@@ -130,7 +130,7 @@ T = table(ag,bg,cg,C1,C2,CV,'RowNames',fnames');
 
 
 % Fedele & Paola 2007
-a_f = 0.8;
+a_f = 0.9;
 b_f = 0.2;
 c_f = 0.15;
 

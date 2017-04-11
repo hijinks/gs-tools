@@ -32,7 +32,7 @@ for fn=1:length(fannames)
         surface_data = fan_data{sn};
         surface = cf.(s_names{sn});
         
-        surface_d84s = [surface_d84s,prctile(cell2mat(surface(:,2)), 84)];
+        surface_d84s = [surface_d84s,prctile(cell2mat(surface(:,2)), 84)]
         
         surface_wolman = cell2mat(surface(:,2));
         surface_wolman(isnan(surface_wolman)) = [];

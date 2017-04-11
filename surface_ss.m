@@ -24,30 +24,35 @@ for u=1:length(fan_names)
         
         sums_total = 0;
         bin_totals = zeros(1,length(xp)-1);
-        all_y = [];
+        dists = struct();
+        
+        dists.('xi') = xp(2:end)';
+        
         for k=1:length(ss)
            [N,edges] = histcounts(ss{k}, xp);
            all_x = [all_x; xp];
 
            sums_total = sums_total+sum(N);
-
+            
            % Frequency Density
            fD = N./sum(N);
            bin_totals = bin_totals+N;
-           all_y = [all_y, fD'];
+           
+           dists.(['Loc_' num2str(k)]) = fD';
+           
             if export < 1
                 plot(xp(2:end), fD);
                 hold on;
             end
         end
-
-
+        
         if export < 1
             title([current_fan_name ' ' surface_data.name]);
         else
             [file,path] = uiputfile('*.csv', 'Save Charts', ...
                 [current_fan_name '_' surface_data.name]);
-            dlmwrite([path file],[xp(2:end)',all_y],'delimiter',',','precision',3)
+            T = struct2table(dists);
+            writetable(T,[path file])
         end
     end
 end

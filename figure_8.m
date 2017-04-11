@@ -1,4 +1,4 @@
-Y = 10.0;                  %# A3 paper size
+Y = 20.0;                  %# A3 paper size
 X = 34.0;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
 yMargin = 1;               %# bottom/top margins from page borders
@@ -21,14 +21,30 @@ fan_names = {'G8', 'G10', 'T1'};
 fans = {g8_data, g10_data, t1_data};
 
 fan_surface_data = struct();
+fan_wolmans = struct('G8', struct('H', [], 'P', []), 'G10', struct('H', [], 'P', []), 'T1', struct('H', [], 'P', []));
+
 for o=1:length(fan_names);
     fdat = fans{o};
     sdat = struct();
+    
     for k=1:length(fdat)
         sdat.(fdat{k}.name) = fdat{k};
+        age = ages.(fan_names{o}).(fdat{k}.name);
+        surf_dist_dat = distance_sorted.(fan_names{o}).(fdat{k}.name);
+        wol = cell2mat(surf_dist_dat(:,2));
+        if (strcmp(age, 'Pleistocene')) < 1
+           fan_wolmans.(fan_names{o}).H = [fan_wolmans.(fan_names{o}).H; wol];
+        else
+           fan_wolmans.(fan_names{o}).P = [fan_wolmans.(fan_names{o}).P; wol];
+        end
     end
+    
     fan_surface_data.(fan_names{o}) = sdat;
+    fan_wolmans.(fan_names{o}).H(isnan(fan_wolmans.(fan_names{o}).H))= [];
+    fan_wolmans.(fan_names{o}).P(isnan(fan_wolmans.(fan_names{o}).P))= [];
 end
+
+
 
 fnames = {};
 fan_categories = {};
@@ -63,6 +79,7 @@ stdev_s = struct('G8', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'G10', struct('A'
 means_s = struct('G8', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'G10', struct('A', 0, 'B', 0, 'C', 0, 'D', 0), 'T1', struct('A', 0, 'C', 0, 'E', 0));
 
 vert_position1 = [1,2,3];
+vert_position2 = [4,5,6];
 
 upper_bounds = nan(length(dir_search),2);
 lower_bounds = nan(length(dir_search),2);
@@ -201,6 +218,12 @@ fans = {g8_data, g10_data, t1_data};
 fannames = fieldnames(distance_sorted);
 
 plot_i = 0;
+
+p_means = struct('G8', [], 'G10', [], 'T1', []);
+h_means = struct('G8', [], 'G10', [], 'T1', []);
+p_equal_mobile = struct('G8', [], 'G10', [], 'T1', []);
+h_equal_mobile = struct('G8', [], 'G10', [], 'T1', []);
+
 for fn=1:length(fannames)
 
     cf = distance_sorted.(fannames{fn});
@@ -235,6 +258,7 @@ for fn=1:length(fannames)
 %         d84 = prctile((sdat), 84);
 %         d50 = prctile((sdat), 50);
 %         average_gs = mean(sdat);
+        
         
         surface_wolman_all = cell2mat(surface(:,2));
         surface_wolman = cell2mat(surface(:,2));
@@ -277,13 +301,22 @@ for fn=1:length(fannames)
         CV_values = [CV_values; CVs.(fannames{fn}).(s_names{sn})];
         stdev_values = [stdev_values; stdev_s.(fannames{fn}).(s_names{sn})];
         means_values = [means_values; means_s.(fannames{fn}).(s_names{sn})];
+        age = ages.(fannames{fn}).(s_names{sn});
+
+        if (strcmp(age, 'Pleistocene')) < 1
+           h_means.(fannames{fn}) = [h_means.(fannames{fn}); means_s.(fannames{fn}).(s_names{sn})];
+           h_equal_mobile.(fannames{fn}) = [h_equal_mobile.(fannames{fn});J1_v];
+        else
+           p_means.(fannames{fn}) = [p_means.(fannames{fn}); means_s.(fannames{fn}).(s_names{sn})];
+           p_equal_mobile.(fannames{fn}) = [p_equal_mobile.(fannames{fn});J1_v];
+        end
 %         surface_d84s = [surface_d84s; d84];
 %         surface_d50s = [surface_d50s; d50];
     end
     left_color = [0 0 0];
     right_color = [.6 .6 .6];
     
-    subplot(1,3,vert_position1(fn));
+    subplot(2,3,vert_position1(fn));
     ax = gca;
     yyaxis left
     
@@ -322,7 +355,21 @@ for fn=1:length(fannames)
      ax.YColor = right_color;
     
     
-     
+     subplot(2,3,vert_position2(fn));
+     [fh,x] = ecdf(fan_wolmans.(fannames{fn}).H);
+     [fp,x] = ecdf(fan_wolmans.(fannames{fn}).P);
+     average_h_j = round(max(h_equal_mobile.(fannames{fn})));
+     average_p_j = round(max(p_equal_mobile.(fannames{fn})));
+     h1 = fh(average_h_j)
+     p1 = fp(average_p_j)
+     cdfplot(fan_wolmans.(fannames{fn}).H);
+     hold on;
+     plot([0 average_h_j average_h_j], [h1 h1 0]);
+     hold on;
+     plot([0 average_p_j average_p_j], [p1 p1 0]);
+     hold on;
+     cdfplot(fan_wolmans.(fannames{fn}).P);
+     xlim([0, 300]);
 %     
 %     legend([jsub, j1, jtransport, mean_plot, cv_plot], 'J = 1.5 (Substrate)','J = 1 (Largest mobile clast)', ...
 %       'J = 0.5 (Transport)', 'Mean grain size',...
@@ -330,8 +377,8 @@ for fn=1:length(fannames)
 
 end
 %subplot(1,4,4);
-      legend([j1, mean_plot, cv_plot], 'J = 1 (Largest mobile clast)', ...
-        'Mean grain size',...
-       'Coefficient of Variation (Cv)','Location','EastOutside')   
+      %legend([j1, mean_plot, cv_plot], 'J = 1 (Largest mobile clast)', ...
+      %  'Mean grain size',...
+      % 'Coefficient of Variation (Cv)','Location','EastOutside')   
 print(f1, '-dpdf', ['pdfs/figure_8_leg' '.pdf'])
 print(f1, '-depsc', ['pdfs/figure_8' '.eps'])

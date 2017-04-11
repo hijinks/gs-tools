@@ -10,7 +10,7 @@ csv_dir = ['.' filesep 'data' filesep 'jfits'];
 dir_search = subdir(csv_dir);
 
 surfaces = [];
-
+meta;
 a_range_all = [];
 b_range_all = [];
 
@@ -19,6 +19,11 @@ fnames = {};
 fan_categories = {};
 surfaces = {};
 colormap winter
+
+ggroups = {};
+gtypes = {};
+gsymbols = [];
+gcolours = [];
 
 for j=1:(length(dir_search)),
     [pathstr,fname,ext] = fileparts(dir_search(j).name);
@@ -42,17 +47,25 @@ for j=1:(length(dir_search)),
             dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'ReturnOnError', false);
 
             fclose(fileID);
-
+                    
             a_range = str2double(dataArray{:, 25});
             a_range(isnan(a_range)) = [];
             a_range_all = [a_range_all; a_range];
             
-            
             b_range = str2double(dataArray{:, 26});
             b_range(isnan(b_range)) = [];
             b_range_all = [b_range_all; b_range];
-
-
+            
+            ggroups = [ggroups; fname; fname; fname; fname];
+            
+            % High Ag
+            % High Bg
+            % Low Ag
+            % Low Bg
+            gtypes = [gtypes; 'High Ag'; 'High Bg'; 'Low Ag'; 'Low Bg'];
+            cl = clrs.(d{1}).(d{2});
+%            gcolours = [gcolours; cl; cl; cl; cl];
+%            gsymbols = [gsymbols; '*'; 'x'; 'd'; 's'];
             clearvars filename delimiter startRow formatSpec fileID dataArray ans;
         end
     end
@@ -60,7 +73,8 @@ end
 
 figure
 
-gscatter(a_range_all,b_range_all)
+%gs = gscatter(a_range_all,b_range_all, {ggroups, gtypes}, gcolours, gsymbols);
+scatter(a_range_all,b_range_all, 'kd', 'MarkerFaceColor', 'k', 'MarkerEdgeColor',[1 1 1]);
 title('Ag relative to Bg');
 xlabel('Ag');
 ylabel('Bg');
