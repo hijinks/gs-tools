@@ -17,7 +17,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             paths = [paths;pathstr];
             filenames = [filenames;name];
             exts = [exts;ext];
-            C = strsplit(pathstr,'/');
+            C = strsplit(pathstr,filesep);
             for l=3:(length(C))
                 n = l-2;
                 if length(sub_dirs) < n
@@ -72,7 +72,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
                 if strcmp(fnp(1), '_') > 0
                     types = [types;'?'];
                 else
-                    exp = '(?<name>\w+)_(?<type>\w+)';
+                    exp = '(?<name>[\s\w]+)_(?<type>\w+)';
                     res = regexp(fnp, exp, 'names');
                     if strcmp(res.type, 'old') < 1
                         types = [types;res.name];
@@ -95,6 +95,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
                 dat.meta = strcat(fan,'/',surface,'/',sites(s),'/',meta_name, '.yml');
                 dat.wolman = strcat(fan,'/',surface,'/',sites(s),'/',wolman_name, '.csv');
                 cur_dat = [cur_dat,dat];
+                
             end
             data_files{s} = cur_dat;
         end
@@ -157,11 +158,11 @@ function [s_data] = fan_data(fan, index_point, coord_file)
             all_wolmans = [all_wolmans,wolmans{w}];
             stdevs = [stdevs,stdDev];
             surf_name = [cmeta.name, '_', cmeta.site];
-            if isvarname(surf_name)
-                surface_col_names{w} = surf_name;
-            else
-                surface_col_names{w} = ['X',surf_name];
-            end
+            
+            s = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            randString = s( ceil(rand(1,5)*length(s)));
+            surface_col_names{w} = ['V',randString,'_', strrep(surf_name, ' ', '_')];
+
 
             % Coefficient of variation (using mean)
             cv_mean = stdDev/m;

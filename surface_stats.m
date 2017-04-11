@@ -49,6 +49,8 @@ function [distance_sorted] = surface_stats(fan_names, fans)
             if strcmp(gname,'')
                 gname = 'nil';
             end
+            
+            gname = strrep(gname, ' ', '_');
 
             % Check if site name exists (eg. t1E-9)
             if sum(strcmp(s_group(:,1), c_name)) > 0
@@ -178,7 +180,14 @@ function [distance_sorted] = surface_stats(fan_names, fans)
            sw = site_wolmans.(sw_n{1});
            d_sorted = sortrows(sw,1);
            r = d_sorted(:,2);
-           wm = cell2mat(r');
+           
+           try
+               wm = cell2mat(r');
+           catch
+               warning('Cell2mat failed');
+               rt = r
+           end
+           
            
            ss = size(wm);
            for y=1:ss(2)
