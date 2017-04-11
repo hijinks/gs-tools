@@ -200,7 +200,7 @@ function [s_data] = fan_data(fan, index_point, coord_file)
 
         surface_columns(sum(~any(surface_columns,length(data_files)),2)==length(data_files), :) = [];    
         T = array2table(surface_columns, 'VariableNames',surface_col_names);
-        writetable(T,strcat('output/',surface,'_', 'G8.csv'));
+        writetable(T,strcat('output/',surface,'_', fan, '.csv'));
         sd.name = surface;
         sd.d84 = d84_dat;
         sd.d50 = d50_dat;

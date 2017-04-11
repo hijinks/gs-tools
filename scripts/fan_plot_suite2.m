@@ -14,16 +14,16 @@ set(f, 'PaperPosition',[0 yMargin xSize ySize])
 set(f, 'PaperUnits','centimeters');
 set(f, 'Visible', 'off');
 
-surface_colours;
+meta;
 [apex_data] = fan_apexes;
 
 output_path = 'dump/comparisons/'
 % Downstream fining plots
-fan_names = {'G8', 'G10', 'T1', 'SR1'};
+fan_names = {'GC', 'HP'};
 line_styles = {'-','-k','-g','-r','-b','-c'};
 point_styles = {'xm','xk','xg','xr','xb','xc'};
 line_point_styles = {'x-','xk-','xg-','xr-','xb-','xc-'};
-fans = {g8_data, g10_data, t1_data, sr1_data};
+fans = {gc_data, hp_data};
 
 % Normalised downstream fining for each surface
 
@@ -44,12 +44,12 @@ for fn=1:length(fannames)
     surface_d84s = [];
 %     surface_figure = figure()
     
-    subplot(2,2, fn)
+    subplot(2,1, fn)
     
     for sn=1:length(s_names)
         
         surface = cf.(s_names{sn});
-        if strcmp(s_names{sn}, 'B') < 1
+        if strcmp(s_names{sn}, 'G') < 1
             
             if strcmp(s_names{sn}, 'F') < 1
                 bigval = nan(5e5,1);
@@ -78,9 +78,9 @@ for fn=1:length(fannames)
                     errors = (prctile(wolmans(:,j), 90)-prctile(wolmans(:,j), 80))/2;
                 end
                 d = boundedline(norm_dist, d84s, errors, '-x', 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
-                ylim([0,150]);
-%                 xlim([0,1.1]);
-                xlabel('Normalised downstream distance');
+                ylim([0,200]);
+                xlim([0,10000]);
+                xlabel('Downstream distance (m)');
                 ylabel('Grain size (mm)');
                 hold on;
                 plot([apex_distance,apex_distance], [-10,200], 'k-');

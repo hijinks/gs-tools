@@ -54,12 +54,17 @@ for fn=1:length(fannames)
         initial_wolman = surface_ds{1,2};
 
         plot(distance, cv, 'x');
+        xlim([0 max(distance)+100]);
         ylim([0,1.2])
         xlabel('Distance (m)');
         ylabel('Cv');
         
         hold on;
-
+        cv_mean = mean(cv);
+        
+        plot([0 max(distance)+100], [cv_mean cv_mean], '--', 'Color', [0.5 0.5 0.5]);
+        hold on;
+        text(1000, cv_mean+0.05, num2str(round(cv_mean,2)));
 %         run_params = {['\bf CV', '\rm ',  num2str(CV)], ...
 %             ['\bf C1 ', '\rm ',  num2str(C1)], ...
 %             ['\bf C2 ', '\rm ', num2str(C2)]
@@ -74,7 +79,7 @@ for fn=1:length(fannames)
         title(s_names{sn});
     end
     
-    stitle = supertitle(fannames{fn});
+    stitle = supertitle([fannames{fn} '- Coefficient of Variation']);
     pos = get(stitle, 'position');
     set(stitle,'position',[0.4 1.0090 0.4]);
     set(gca, 'FontSize', 14);
