@@ -90,7 +90,8 @@ for j=1:(length(dir_search)),
              C2 = str2double(dataArray{1, 21}{1});
              a_range = str2double(dataArray{:, 25});
              b_range = str2double(dataArray{:, 26});
-             c_range = [0.1 0.1 0.1 0.1 0.1 0.1]
+             c_range = str2double(dataArray{:, 27});
+             %c_range = [0.1 0.1 0.1 0.1 0.1 0.1]
              
              
              model_fractions = zeros(length(ss_var1), 6);
@@ -128,12 +129,15 @@ for j=1:(length(dir_search)),
             bglist = dataArray{1, 14};
             bg = str2double(bglist{1});
 
-            cg = 0.1;
+            cglist = dataArray{1, 15};
+            cg = str2double(cglist{1});
+            
+            %cg = 0.1;
             
             fan_abc.(d{1}).(d{2}) = [ag, bg, cg];
             all_a = [all_a; ag];
             all_b = [all_b; bg];
-
+            
             ed = -5.5:.5:5.5;
             xp = [-5:.5:5.5];
 

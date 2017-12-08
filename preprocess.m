@@ -4,6 +4,7 @@
 % Correctly sort fan surface points by distance
 
 addpath('./lib');
+addpath('./scripts');
 
 %fan_names = {'G8', 'G10', 'T1', 'SR1'};
 %fans = {g8_data, g10_data, t1_data, sr1_data};

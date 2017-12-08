@@ -24,7 +24,6 @@ for fn=1:length(fannames)
     s_names = fieldnames(cf);
     subplot(2,3,fn);
     surface_wolmans = [];
-    surface_d84s = [];
     
     for sn=1:length(s_names)
 
@@ -32,54 +31,16 @@ for fn=1:length(fannames)
         surface_data = fan_data{sn};
         surface = cf.(s_names{sn});
         
-        surface_d84s = [surface_d84s,prctile(cell2mat(surface(:,2)), 84)]
-        
         surface_wolman = cell2mat(surface(:,2));
         surface_wolman(isnan(surface_wolman)) = [];
         dif = length(bigval) - length(surface_wolman);
         pad = nan(dif,1);
         surface_wolman = [surface_wolman;pad];
         surface_wolmans = [surface_wolmans,surface_wolman];
-        
-        age = ages.(fannames{fn}).(s_names{sn});
-        if (strcmp(age, 'Pleistocene')) < 1
-           color = warm_colours(20, :);
-           t = 0;
-        else
-           color = cold_colours(30, :);
-           t = 1;
-        end
-        len = length(surface(:,1));
-        for k=1:len
-            h = cdfplot(surface{k,2}); 
-            set(h,'Color',color)
-            hold on;
-            if t
-               last_pleistocene = h;
-            else
-               last_holocene = h; 
-            end
-        end
-        set(h.Parent, 'xlim', [0 250]);
-        set(gca,'FontSize', 12);
-    end
-    title(fannames{fn});
-    xlabel('Grain size');
-    d84_line = plot([0,300], [.84,.84], 'k--');
-    d50_line = plot([0,300], [.5, .5], 'b:');
-    
-    subplot(2,3,fn+3);
+    end    
 
     boxplot(surface_wolmans, 'DataLim', [0 201], 'ExtremeMode', 'clip', 'symbol', '','Labels', s_names);
-    hold on;
-    sd = plot(surface_d84s, 'kx-');
-    xlabel('Surfaces');
-    ylabel('Grain size (mm)');
-    ylim([-5 200]);
-    set(gca,'xtick',1:length(s_names), 'xticklabel',s_names)
-    legend(sd, 'D84')
-    title(fannames{fn});
-    set(gca,'FontSize', 12);
+
 end
 % subplot(1,3,3);
 % plot([] , []);

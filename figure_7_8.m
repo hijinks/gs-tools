@@ -114,7 +114,7 @@ for j=1:(length(dir_search)),
             gs_predict = (ss_vars.*mean(stdev))+mean(means);
             
             xlim([0 150]);
-%             ylim([0 3]);
+            ylim([0 3]);
             ss_cumul = [ss_cumul; ss_vars'];
             gs_cumul = [gs_cumul; gs_predict'];
             gs_predictions = [gs_predictions, gs_predict'];
@@ -123,12 +123,13 @@ for j=1:(length(dir_search)),
             fit_ss = [fit_ss, ss_var1];
             axes(ha(spp(1)));
             if strcmp(ages.(d{1}).(d{2}), 'Pleistocene') > 0
-                p1 = plot(ss_vars, J_vals, '-', 'Color', [0 0 0], 'LineWidth', 1.5);
+                p1 = plot(ss_vars, J_vals, '-', 'Color', [0.2000    0.5000    1.0000], 'LineWidth', 1.5);
             else
-                p1 = plot(ss_vars, J_vals, '-', 'Color', [0.6 0.6 0.6], 'LineWidth', 1.5);
+                p1 = plot(ss_vars, J_vals, '-', 'Color', [1.0000    0.5000    0.5000], 'LineWidth', 1.5);
             end
             xlim([-2 4]);
             ylim([0 3]);
+            grid on;
             hold on;
             ss_vars(isinf(ss_vars)) = [];
             ss_padding = [max(ss_vars),5]
@@ -137,9 +138,9 @@ for j=1:(length(dir_search)),
             axes(ha(spp(2)));
             
             if strcmp(ages.(d{1}).(d{2}), 'Pleistocene') > 0
-                p2 = plot(gs_predict, J_vals, '-', 'Color', [0 0 0], 'LineWidth', 1.5);
+                p2 = plot(gs_predict, J_vals, '-', 'Color', [0.2000    0.5000    1.0000], 'LineWidth', 1.5);
             else
-                p2 = plot(gs_predict, J_vals, '-', 'Color', [0.6 0.6 0.6], 'LineWidth', 1.5);
+                p2 = plot(gs_predict, J_vals, '-', 'Color', [1.0000    0.5000    0.5000], 'LineWidth', 1.5);
             end
             
             ylim([0 3]);
@@ -148,6 +149,7 @@ for j=1:(length(dir_search)),
             ss_padding = [max(gs_predict),300]
             plot(ss_padding, ones(1, length(ss_padding))*min(J_vals), ':', 'Color', [.7,.7,.7], 'LineWidth', 1.5);
             hold on;
+            grid on;
             ylim([0 3]);
         end
     end
@@ -171,26 +173,39 @@ sort_ss_cumul(Infindexes) = [];
 
 gs_x = 0:1:300;
 % Fedele & Paola 2007
-a_f = 0.8;
-b_f = 0.2;
-c_f = 0.15;
+a_f = 0.1;
+b_f = 4.5;
+c_f = 0.0871;
 J_vals = c_f:.01:3;
 ss_vars = -log((J_vals-c_f)/a_f)/b_f;
-gs_f_p = (ss_vars*p(1))+p(2);
+
+gs_f_p1 = (ss_vars*p(1))+p(2);
+
+mu = 5;
+stev = 3;
+
+gs_f_p2 = (ss_vars*stev)+mu;
+
 for o=1:6
     axes(ha(o));
-
     f = factor(o);
     
     if f(1) - 2
         p2 = plot(ss_vars, J_vals, 'k--', 'LineWidth', 1);
         hold on;
-        plot([-3, 5], [1, 1], 'k:');        
+        plot([-3, 5], [1, 1], 'k:');  
+        hold on;
+        plot([max(ss_vars(ss_vars<inf)), 250],[min(J_vals), min(J_vals)] , ':', 'Color', [.7,.7,.7], 'LineWidth', 1.5);
     else
-        p2 = plot(gs_f_p, J_vals, 'k--', 'LineWidth', 1);
+        p2 = plot(gs_f_p1, J_vals, 'k--', 'LineWidth', 1);
         set(ha(o),'YTickLabel',''); 
         hold on;
         plot([0, 250], [1, 1], 'k:');
+        hold on;
+        p2 = plot(gs_f_p2, J_vals, 'k-.', 'LineWidth', 1);
+        set(ha(o),'YTickLabel',''); 
+        hold on;
+        plot([max(gs_f_p2(gs_f_p2<inf)), 250],[min(J_vals), min(J_vals)] , ':', 'Color', [.7,.7,.7], 'LineWidth', 1.5);
     end
     
     if o < 5

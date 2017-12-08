@@ -1,8 +1,8 @@
 % Downstream change in grain size for each fan surface with corresponding
 % downstream change in coefficient of variation
 
-Y = 21.0;                  %# A3 paper size
-X = 29.7;                  %# A3 paper size
+Y = 29.0;                  %# A3 paper size
+X = 42.7;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
 yMargin = 1;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
@@ -12,7 +12,7 @@ set(f, 'Position', [0,0, 1200, 800])
 set(f, 'PaperSize',[X Y]);
 set(f, 'PaperPosition',[0 yMargin xSize ySize])
 set(f, 'PaperUnits','centimeters');
-set(f, 'Visible', 'off');
+%set(f, 'Visible', 'off');
 
 meta;
 [apex_data] = fan_apexes;
@@ -26,6 +26,7 @@ fans = {g8_data, g10_data, t1_data};
 fannames = fieldnames(distance_sorted);
 
 plot_i = 0;
+
 for fn=1:length(fannames)
     fan_name = fannames{fn};
     cf = distance_sorted.(fannames{fn});
@@ -63,30 +64,47 @@ for fn=1:length(fannames)
             apex_data.(fan_name), origins.(fan_name)); 
 
         wolmans = cell2mat(surface(:,2)');
-        d84s = zeros(1,len);
+        means = zeros(1,len);
         errors = zeros(1,len);
         cv= zeros(1, len);
         
         for j=1:len
-            d84s(1,j) = prctile(wolmans(:,j), 84);
-            errors(1,j) = (prctile(wolmans(:,j), 90)-prctile(wolmans(:,j), 80))/2;
             wm = wolmans(:,j);
             wm(isnan(wm)) = [];
+            means(1,j) = mean(wm);
+            errors(1,j) = (prctile(wolmans(:,j), 60)-prctile(wolmans(:,j), 50))/2;
             cv(1,j) = std(wm)/mean(wm);
         end
         
-        
         subplot(3,2, plot_ds);
+
+        ft = fittype( 'a*exp(-b*x)', 'independent', 'x', 'dependent', 'y' );
+        opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
+        opts.Display = 'Off';
+        opts.Lower = [-Inf 0.0001];
+        opts.Robust = 'LAR';
+        opts.StartPoint = [30 0.8033];
+        opts.Upper = [Inf 0.0005];
+
+
+        % Fit model to data.
+        [fitresult, gof] = fit(distances, means', ft, opts );
+
+        d = plot(distances, means', ['-' symbols.(fannames{fn}).(s_names{sn})], 'Color', clrs.(fannames{fn}).(s_names{sn}));
+        hold on;
         
-        d = plot(relative_distances, d84s, ['-' symbols.(fannames{fn}).(s_names{sn})], 'Color', clrs.(fannames{fn}).(s_names{sn}));
-        %d = boundedline(relative_distances, d84s, errors, ['-' symbols.(fannames{fn}).(s_names{sn})], 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
-        ylim([0,150]);
+        newdists = 0:1:6000;
+        sternberg = fitresult.a*exp(-newdists.*fitresult.b);
         
-        if strcmp(fan_name, 'G10') > 0
-            xlim([-1000,1500]);
-        else
-            xlim([-1000,2500]);
-        end
+        h = plot(newdists, sternberg, ['-'], 'Color', clrs.(fannames{fn}).(s_names{sn}));
+        %d = boundedline(relative_distances, means, errors, ['-' symbols.(fannames{fn}).(s_names{sn})], 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
+        ylim([0,100]);
+        
+         if strcmp(fan_name, 'T1') > 0
+            xlim([0,6000]);
+         else
+            xlim([0,4000]);
+         end
         
         xlabel('Downstream distance (m)');
         ylabel('Grain size (mm)');
@@ -103,7 +121,7 @@ for fn=1:length(fannames)
     text(0+30, 30, '- Fan apex');
     %textLoc('Bounds: D80-D90', 'southeast');
     legend(legend_items,char(legend_labels));
-    textLoc(['\bf', fannames{fn}, ' - D84'], 'northwest', 'FontSize', 12);
+    textLoc(['\bf', fannames{fn}, ' - Mean'], 'northwest', 'FontSize', 12);
     plot([0,0], [-10,200], 'k--');
     subplot(3,2, plot_ss);
     ylim([0,1.2]);
@@ -124,6 +142,7 @@ for fn=1:length(fannames)
     ylabel('Cv');    
     set(gca, 'FontSize', 12)
 end
+
 
 print(f, '-dpdf', ['pdfs/figure_4' '.pdf'])
 print(f, '-depsc', ['pdfs/figure_4' '.eps'])

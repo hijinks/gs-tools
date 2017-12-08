@@ -21,8 +21,8 @@ cg = nan(lt,1);
 C1 = nan(lt,1);
 C2 = nan(lt,1);
 CV = nan(lt,1);
-upper_bounds = nan(lt,2);
-lower_bounds = nan(lt,2);
+upper_bounds = nan(lt,3);
+lower_bounds = nan(lt,3);
 
 row_names = cell(length(dir_search),1);
 fnames = {};
@@ -100,12 +100,13 @@ for j=1:(length(dir_search)),
             CV(i) = str2double(cvlist{1});
 
             upper = dataArray{:, 23};
-            upper_bounds(i,:) = [str2double(upper{1}),str2double(upper{2})];
+            upper_bounds(i,:) = [str2double(upper{1}),str2double(upper{2}),...
+                str2double(upper{3})];
             
             lower = dataArray{:, 24};
-            lower_bounds(i,:) = [str2double(lower{1}),str2double(lower{2})];
-
-
+            lower_bounds(i,:) = [str2double(lower{1}),str2double(lower{2}),...
+                str2double(lower{3})];
+            
             clearvars filename delimiter startRow formatSpec fileID dataArray ans;
         end
     end
@@ -130,9 +131,9 @@ T = table(ag,bg,cg,C1,C2,CV,'RowNames',fnames');
 
 
 % Fedele & Paola 2007
-a_f = 0.9;
-b_f = 0.2;
-c_f = 0.15;
+a_f = 0.8;
+b_f = 4.5;
+c_f = 0.0871;
 
 % Mitch
 a_mi = 0.15;
@@ -156,8 +157,8 @@ colormap bone
 colors = ['b' 'b' 'b' 'b' 'b' 'm' 'm' 'm' 'm' 'k' 'k' 'k'];
 symbols2 = ['o' 'o' 'o' 'o' 'o' 'd' 'd' 'd' 'd' 'x' 'x' 'x'];
 subplot(2,3,1);
-lb = abs(ag-upper_bounds(:,1));
-ub = abs(ag-lower_bounds(:,1));
+lb = abs(ag-upper_bounds(1:length(ag),1));
+ub = abs(ag-lower_bounds(1:length(ag),1));
 errorbar(1:1:length(ag),ag, lb,ub)
 hold on;
 gscatter(1:1:length(ag),ag,fan_categories', colors, symbols2, '', 'off');
@@ -183,8 +184,8 @@ title('ag');
 textLoc('Non-linear fit', 'northeast');
 
 subplot(2,3,2);
-lb = abs(bg-upper_bounds(:,2));
-ub = abs(bg-lower_bounds(:,2));
+lb = abs(bg-upper_bounds(1:length(bg),2));
+ub = abs(bg-lower_bounds(1:length(bg),2));
 errorbar(1:1:length(bg),bg, lb,ub)
 hold on;
 gscatter(1:1:length(bg),bg,fan_categories', colors, symbols2, '', 'off');
@@ -211,6 +212,13 @@ title('bg');
 textLoc('Non-linear fit', 'northeast');
 
 subplot(2,3,3);
+bound_size = size(upper_bounds);
+if bound_size(2) > 2
+    lb = abs(cg-upper_bounds(1:length(cg),3));
+    ub = abs(cg-lower_bounds(1:length(cg),3));
+    errorbar(1:1:length(cg),cg, lb,ub)
+    hold on;
+end
 hold on
 gscatter(1:1:length(cg),cg,fan_categories', colors, symbols2, '', 'off');
 
@@ -229,7 +237,7 @@ hold on;
 c_m = mean(cg);
 p3 = plot(0:1:length(cg)+1, ones(1,length(ag)+2).*c_m, '--b');
 xlim([0,length(cg)+1]);
-ylim([0 1]);
+ylim([-.4 1]);
 title('cg');
 legend([p1,p2,p3], {'Fedele & Paola 2007', 'D''Arcy et al. 2016', 'This study (mean)'});
 textLoc('Fixed', 'northeast');
@@ -264,7 +272,7 @@ hold on;
 % Mitch
 plot(0:1:length(C2)+1, ones(1,length(ag)+2).*C2_mi, '--r');
 xlim([0,length(C2)+1]);
-ylim([0 1.5]);
+ylim([0 2]);
 title('C2');
 textLoc('Field-Derived', 'northeast');
 

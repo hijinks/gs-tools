@@ -26,7 +26,7 @@ for u=1:length(fan_names)
     for w=1:length(current_fan)
         
         surface_data = current_fan{w};
-        ss = surface_data.ss;
+        wolmans = surface_data.wolmans;
         
         sub_pos = subplotNumbers.(current_fan_name);
         subplot(5,3,sub_pos(w));
@@ -42,20 +42,20 @@ for u=1:length(fan_names)
         bin_totals = zeros(1,length(xp)-1);
         all_y = [];
         
-%         for k=1:length(ss)
-%            h = cdfplot(ss{k});
+%         for k=1:length(wolmans)
+%            h = cdfplot(wolmans{k});
 %            set(h,'Color',color)
 %            hold on;
 %         end
 
-        prms = nchoosek(1:1:length(ss),2);
+        prms = nchoosek(1:1:length(wolmans),2);
         p_vals = [];
         k_vals = [];
         h_vals = [];
-        ktest_mat = zeros(length(ss), length(ss));
+        ktest_mat = zeros(length(wolmans), length(wolmans));
         
         for p=1:length(prms)
-            [H,P, KSSTAT] = kstest2(ss{prms(p,1)}, ss{prms(p,2)},'Alpha',0.05);
+            [H,P, KSSTAT] = kstest2(wolmans{prms(p,1)}, wolmans{prms(p,2)},'Alpha',0.05);
             ktest_mat(prms(p,1),prms(p,2)) = H+1;
             h_vals = [h_vals; H];
             k_vals = [k_vals; KSSTAT];
@@ -63,7 +63,7 @@ for u=1:length(fan_names)
         
         k = tabulate(h_vals);
         total_percent = [total_percent; k(1,3)];
-        ktest_mat = tril(ktest_mat, length(ss))'+ktest_mat;
+        ktest_mat = tril(ktest_mat, length(wolmans))'+ktest_mat;
         pcolor(ktest_mat);
         cmap = jet(20);
         cmap = flipud(cmap(1:10,:));
@@ -89,4 +89,4 @@ for u=1:length(fan_names)
     end
 end
 
-print(f1, '-dpdf', ['pdfs/figure_a1.pdf'])
+print(f1, '-dpdf', ['pdfs/figure_a2.pdf'])

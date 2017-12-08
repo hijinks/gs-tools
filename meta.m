@@ -46,14 +46,14 @@ clrs.SR1.D = cold_colours2(1*d, :);
 
 l = 4;
 d = floor(64/l);
-clrs.GC.A = warm_colours(1*d, :);
+clrs.GC.A = [0    0.8000         0];
 clrs.GC.B = warm_colours(2*d, :);
 clrs.GC.D = cold_colours2(1*d, :);
 
 l = 4;
 d = floor(64/l);
 
-clrs.HP.A = warm_colours(1*d, :);
+clrs.HP.A = [0    0.8000         0];
 clrs.HP.B = warm_colours(2*d, :);
 clrs.HP.C = cold_colours2(1*d, :);
 

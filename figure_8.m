@@ -318,18 +318,18 @@ for fn=1:length(fannames)
     
     subplot(2,3,vert_position1(fn));
     ax = gca;
-    yyaxis left
+    %yyaxis left
     
 %    jsub = plot(1:1:length(s_names), J_substrate_values, '-*');
 %    hold on;
 %    errorbar(1:1:length(s_names),J_substrate_values, Jsubs_pos, Jsubs_neg);
     
     hold on;
-    yyaxis left
+    %%yyaxis left
     j1 = plot(1:1:length(s_names), J_values, '-kx');
     hold on;
     errorbar(1:1:length(s_names),J_values, J1_pos, J1_neg, 'Color', 'k');
-    ax.YColor = left_color;
+   %% ax.YColor = left_color;
 %     hold on;
 %     yyaxis left 
 %     jtransport = plot(1:1:length(s_names), J_transport_values, '-o');
@@ -342,17 +342,17 @@ for fn=1:length(fannames)
      ylim([0, 70]);
      ax.YColor = left_color;
      
-    yyaxis right
+    %%yyaxis right
      hold on;
-     cv_plot = plot(CV_values, '-o', 'Color', right_color);
-     ylim([.5, 1]);
-     ylabel('Cv');
+     %cv_plot = plot(CV_values, '-o', 'Color', right_color);
+     %%ylim([.5, 1]);
+     %ylabel('Cv');
      end_v = length(s_names)+.5;
      xlim([.5, end_v]);
      set(gca,'xtick',1:length(s_names), 'xticklabel',s_names)
      title([fannames{fn}])
      xlabel('Surfaces');
-     ax.YColor = right_color;
+    %% ax.YColor = right_color;
     
     
      subplot(2,3,vert_position2(fn));

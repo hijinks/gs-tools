@@ -1,8 +1,8 @@
 addpath('./scripts');
 addpath('./lib');
 
-X = 42.0;                  %# A3 paper size
-Y = 29.7;                  %# A3 paper size
+X = 30.0;                  %# A3 paper size
+Y = 60.7;                  %# A3 paper size
 xMargin = 0;               %# left/right margins from page borders
 yMargin = 2;               %# bottom/top margins from page borders
 xSize = X - 2*xMargin;     %# figure size on paper (widht & hieght)
@@ -20,6 +20,7 @@ meta;
 output_path = 'dump/comparisons/'
 % Downstream fining plots
 fan_names = {'GC', 'HP'};
+fan_names_full = {'Galena Canyon', 'Hanaupah Canyon'};
 line_styles = {'-','-k','-g','-r','-b','-c'};
 point_styles = {'xm','xk','xg','xr','xb','xc'};
 line_point_styles = {'x-','xk-','xg-','xr-','xb-','xc-'};
@@ -71,14 +72,14 @@ for fn=1:length(fannames)
                 max_dist = max(distances);
                 norm_dist = distances;
                 wolmans = cell2mat(surface(:,2)');
-                d84s = zeros(1,len);
+                d50s = zeros(1,len);
                 errors = zeros(1,len);
                 for j=1:len
-                    d84s(1,j) = prctile(wolmans(:,j), 84);
-                    errors = (prctile(wolmans(:,j), 90)-prctile(wolmans(:,j), 80))/2;
+                    d50s(1,j) = prctile(wolmans(:,j), 50);
+                    errors = (prctile(wolmans(:,j), 70)-prctile(wolmans(:,j), 30))/2;
                 end
-                d = boundedline(norm_dist, d84s, errors, '-x', 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
-                ylim([0,200]);
+                d = boundedline(norm_dist, d50s, errors, '-x', 'alpha', 'cmap', clrs.(fannames{fn}).(s_names{sn}));
+                ylim([0,140]);
                 xlim([0,10000]);
                 xlabel('Downstream distance (m)');
                 ylabel('Grain size (mm)');
@@ -90,11 +91,15 @@ for fn=1:length(fannames)
             end
         end
     end
-    legend(legend_items,char(legend_labels));
-    title(fannames{fn});
-    set(gca, 'FontSize', 14)
+    
+    %legend(legend_items,char(legend_labels));
+    legend(legend_items,'Q4','Q3','Q2c');
+    title([fan_names_full{fn} ' Downstream D_{50} Grain Size']);
+    set(gca, 'FontSize', 25);
+    set(gca, 'LineWidth', 2);
+    t=textLoc('Bounds = 30-70th percentile','northwest', 'FontSize', 24);
 
-print(f, '-dpng', ['fans_downstream', '.png'])
+print(f, '-dpdf', ['fans_downstream', '.pdf'])
     
 %     surface_averages_figure = figure;
 %     
